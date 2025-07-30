@@ -1,0 +1,38 @@
+Here are some basic questions commonly asked in Continuous Integration (CI) interviews:
+
+1. What is Continuous Integration (CI)?
+CI is the practice of frequently integrating code into a shared repository, where it is automatically built and tested. The goal is to detect integration issues early, improve software quality, and streamline the development process.
+2. What are the benefits of using Continuous Integration?
+Early bug detection: Frequent integration helps identify issues early in the development cycle.
+Improved collaboration: Developers can share code frequently, improving team collaboration.
+Faster delivery: Automated builds and tests speed up the software release process.
+Higher quality: Regular testing ensures that bugs are caught and fixed quickly.
+3. What are some CI tools you are familiar with?
+Common CI tools include Jenkins, GitLab CI, CircleCI, Travis CI, and Bamboo. Each tool offers features like automated builds, test execution, and integration with version control systems.
+4. How do you handle build failures in a CI pipeline?
+Investigate the failure logs: Identify the root cause of the failure (e.g., code errors, dependencies).
+Communicate with the team: Inform the team about the failure and collaborate to fix it.
+Fix the issue: Implement the necessary changes and trigger a new build to validate the fix.
+Ensure proper rollback mechanisms: In case of critical issues, ensure the ability to revert to a stable build.
+5. What is a build pipeline, and how does it relate to CI?
+A build pipeline is a series of automated steps that your code goes through before it can be deployed, such as building the code, running tests, and deploying to different environments.
+In CI, the pipeline automates the process to ensure the code is always in a deployable state.
+6. What types of tests are typically run in a CI pipeline?
+Unit tests: Test individual components or functions to ensure they work correctly.
+Integration tests: Test how various components interact with each other.
+End-to-end tests: Test the entire application flow, simulating user interactions.
+Smoke tests: Quick tests to ensure basic functionality is working after deployment.
+7. What is the difference between Continuous Integration (CI) and Continuous Delivery (CD)?
+CI focuses on the automation of code integration, testing, and building, ensuring that developers can continuously integrate their changes into a shared repository.
+CD extends CI to automate the deployment of code to production or staging environments, enabling more frequent releases.
+8. How would you ensure that the CI pipeline is fast and efficient?
+Parallel test execution: Run tests in parallel to reduce build time.
+Optimize dependencies: Minimize unnecessary dependencies or use caching to avoid redundant installations.
+Only run tests that are relevant: Run tests specific to the modified code rather than the entire test suite.
+Frequent but small commits: Encourage developers to commit smaller changes more frequently to reduce build complexity.
+9. How would you handle sensitive data in a CI pipeline (e.g., API keys, passwords)?
+Environment variables: Store sensitive data in environment variables, which are securely injected into the pipeline during runtime.
+Secret management tools: Use tools like Vault or AWS Secrets Manager for secure storage and management of secrets.
+Avoid hardcoding: Never hardcode sensitive data directly in the codebase.
+10. What is a pull request (PR) in the context of CI?
+A PR is a request to merge changes from one branch to another. CI tools automatically build and test the changes in the PR before it is merged into the main branch to ensure that it does not break the codebase.

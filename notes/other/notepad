@@ -1,0 +1,53 @@
+Essential Duties and Responsibilities:
+
+Work with development teams to ideate software solutions
+Design and implementation of the overall web architecture
+Develop and manage well-functioning databases and applications
+Work with their US counterpart to conduct scrums, sprint planning and sprint retrospective
+Design and implementation of continuous integration and deployment
+Build features and applications with a mobile responsive design
+Problem-solving with alternative approaches and in consultation with stakeholders
+Working as part of a team encourages innovation & best practices
+Required Qualifications:
+
+5+ years of Proven work experience in Ruby development
+Deep expertise in object-oriented development, including strong design pattern knowledge
+Good understanding of the syntax of Ruby and its nuances
+Degree in Computer Science, Statistics, or relevant field
+Knowledge of multiple front-end languages and libraries (e.g. HTML/ CSS, JavaScript, XML, jQuery) and JavaScript frameworks (e.g. Angular, React, Node.js)
+Familiarity with databases (e.g. PostgreSQL, MySQL, MSSQL, Oracle, MongoDB), web servers (e.g. Apache) and UI/UX design
+Thorough understanding of user experience and possibly even product strategy
+Experience implementing testing platforms and unit tests
+Understanding of Messaging concepts and technologies Active MQ/RabbitMQ etc.
+DevOps concepts and understanding of Open-source cloud technologies
+Proficiency with SVN or Git
+Appreciation for clean and well-documented code
+Excellent verbal and written communication skills
+Precise attention to detail
+Strong judgement and commitment to ethics
+Preferred Qualifications:
+
+1+ years’ experience with ecommerce platforms
+Basic familiarity with Amazon.com, Walmart.com, and other ecommerce marketplaces
+Strong writing and editing skills
+Previous experience working in a high-stakes business environment
+Conducted annual reviews, one-on-one weekly meetings
+Participate in hiring their team members
+
+
+
+sra interview
+When a post is destroyed it's comments still exist in the database. How should we go about fixing this?
+
+A malicious user was able to post a rating with 6 stars. How did this happen and how can we prevent it?
+
+A normal user reports they were able to make two posts with the same Title. We already enforce uniqueness on the Post model. How did this happen? How can we prevent it?
+
+A penetration tester injected javascript onto our page.
+
+Avoid html_safe
+Do not use html_safe on user-generated content unless you are 100% sure the data has been sanitized. For example:
+
+Validate and Sanitize Inputs
+Validate input data in models or controllers to ensure only expected data is processed.
+Use gems like Loofah or Sanitize for more granular HTML sanitization.

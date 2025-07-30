@@ -1,0 +1,204 @@
+# Authentication (checks identity) & Authorization (checks access)
+how may whys for authenticate users ?
+  Password	Most common
+  Multi-Factor Authentication 	Secure login, banking, enterprise apps
+  OAuth/Social Login	Fast login, user convenience
+  Token-Based (JWT)	APIs, SPAs, mobile apps
+  Session-Based	Traditional web apps
+  Magic Link	Passwordless login
+
+Devise gem: setup, customizations, OmniAuth integration
+
+JWT-based auth for APIs
+
+Role-based access control (e.g., Pundit, CanCanCan)
+
+Authentication techniques:
+
+Cookie-based sessions
+
+Token-based (e.g., for APIs)
+
+OAuth2 / SSO integration
+
+# ActiveRecord & Database
+Associations (has_many, belongs_to, etc.)
+
+Eager loading vs lazy loading (includes, joins, etc.)
+
+Scopes and custom queries
+
+Transactions and locking
+
+Indexes and performance tuning
+
+Raw SQL in ActiveRecord
+
+# API Development
+Building Rails APIs (using --api mode)
+
+Versioning APIs
+
+JSON serialization (Jbuilder, ActiveModel::Serializers, fast_jsonapi)
+
+Rate limiting and throttling (Rack::Attack)
+
+Error handling in APIs
+
+# Background Jobs & Scheduling
+Sidekiq, DelayedJob, Resque
+
+Active Job abstraction
+
+Cron jobs with whenever gem
+
+# Search Integration
+Full-text search techniques
+
+PostgreSQL full-text search (tsvector)
+
+Elasticsearch
+
+Solr (Sunspot gem or RSolr)
+
+Free-text search using pg_search or ransack
+
+Pros and cons of Solr vs Elasticsearch vs native DB search
+
+# Testing
+RSpec (factories, mocks, model/controller/request specs)
+
+Capybara for integration testing
+
+FactoryBot
+
+Minitest
+
+CI tools (GitHub Actions, CircleCI)
+
+# Security
+CSRF, XSS, SQL Injection prevention
+
+Secure password storage (has_secure_password, bcrypt)
+
+Mass assignment protection
+
+Secure headers
+
+# Performance & Optimization
+N+1 query problem and Bullet gem
+
+Caching: fragment, Russian doll caching, low-level
+
+Query optimization, DB indexing
+
+Rack middleware
+
+Page rendering speed improvements
+
+# Deployment & DevOps
+Capistrano
+
+Dockerize a Rails app
+
+Heroku, AWS (EC2, S3, RDS)
+
+Environment configs
+
+Logs and monitoring (Lograge, Sentry)
+
+# Front-End Integration
+Hotwire/Turbo and Stimulus (Rails 7+)
+
+Webpacker / importmaps / asset pipeline
+
+React or Vue.js integration
+
+Tailwind CSS with Rails
+
+
+# Other Good-to-Know Topics
+Service objects / decorators / presenters
+
+Concerns (modularizing code)
+
+Rails Engines
+
+Internationalization (I18n)
+
+ActiveStorage and file uploads
+
+
+-----
+
+
+✅ Model & Database
+create vs new
+
+save vs save!
+
+update vs update_attributes vs update_attribute
+
+find vs find_by vs where
+
+joins vs includes vs preload vs eager_load
+
+has_many vs has_many through vs has_and_belongs_to_many
+
+dependent: :destroy vs dependent: :delete_all
+
+✅ Controller & Routing
+render vs redirect_to
+
+before_action vs after_action vs around_action
+
+params.require vs params.permit
+
+get vs post (in routes and HTTP methods)
+
+✅ Validation & Callbacks
+validates vs validate
+
+before_save vs before_create vs before_validation
+
+✅ Error Handling
+raise vs throw
+
+rescue vs ensure
+
+save vs save! vs create!
+
+✅ Background Jobs
+ActiveJob vs Sidekiq vs DelayedJob
+
+✅ Authentication & Authorization
+Devise vs JWT
+
+Pundit vs CanCanCan
+
+✅ Templating & Frontend
+ERB vs Haml vs Slim
+
+Webpacker vs Importmaps (Rails 6 vs Rails 7 asset management)
+
+Hotwire vs React for interactivity
+
+✅ Testing
+RSpec vs Minitest
+
+FactoryBot vs Fixtures
+
+mock vs stub
+
+✅ Miscellaneous
+Concern vs Module
+
+Service Object vs Concern
+
+form_with vs form_for
+
+Time.now vs Time.current
+
+Symbol vs String keys in params/hash
+
+

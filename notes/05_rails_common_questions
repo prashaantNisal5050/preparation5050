@@ -1,0 +1,163 @@
+# why do you like ruby?
+1. Metaprogramming: the uses of metaprogramming is seen in ActiveRecord through dynamic finders
+	You can dynamically create methods using define_method.
+Benefits:
+This approach reduces boilerplate code and makes it easier to interact with the database.
+It allows for a clean and readable API, enabling developers to work quickly.
+
+# list of all best practices: 
+	1 Follow the Ruby Style Guide:
+	2 Choose descriptive and meaningful names for classes, methods, and variables.
+	3 Each method should have a single responsibility and be short enough to be easily understood.
+	4 If a method is doing too much, consider breaking it down into smaller methods.
+	5 use of DRY principle (Don't Repeat Yourself):
+	6 Avoid code duplication by extracting common logic into methods or modules.
+	7 Write Tests:
+		Implement unit tests using frameworks like RSpec or Minitest to ensure your code behaves as expected.
+	
+		Writing tests promotes code reliability and helps catch bugs early in the development process.
+		Use Version Control:
+	8 use version control systems like Git to track changes in your codebase. This practice facilitates collaboration and helps manage code revisions effectively.
+	9. Document Your Code:create user-friendly documentation for your code using YARD gem.
+	10. Handle Exceptions Gracefully:
+	11. Review and Refactor Regularly:
+
+# How do you ensure your Ruby application is scalable?
+		Scalability in a Ruby application can be achieved through several approaches, such as 
+			1 optimizing database queries, 
+			2 using background jobs, and 
+			3 employing caching mechanisms.
+			4 Additionally, using a microservices architecture can distribute the load more efficiently.
+
+		OR 			
+			  A scalable Rails application might:
+
+				Use PostgreSQL with read replicas.
+				Cache frequently accessed data using Redis.
+				Process emails and notifications with Sidekiq.
+				Expose APIs using GraphQL for flexibility.
+				Load balance traffic across multiple servers using AWS ELB.
+				Monitor performance using New Relic or Datadog. or sumologic
+				Scale dynamically using AWS Auto Scaling Groups.
+				By following these principles and tools, you can build scalable and reliable applications that grow with user demand.
+
+# questions on microservices: 
+
+	# microservices : large application to be separated into smaller independent parts
+
+	advantages : Microservice architecture is a style of software design that structures an application as a collection of small, independent, and loosely coupled services, each responsible for a specific function or feature.
+
+		- Scalability: allowing teams to scale only the services that need it.
+
+		- Fault Isolation: Since services are decoupled, failure in one service doesn’t necessarily bring down the entire application.
+
+		- Flexibility in Technology Stack: Different services can use different languages, frameworks, or databases best suited to their function
+
+	What challenges have you faced when working with microservices?
+	managing inter-service communication : 
+		services often need to communicate with each other. 
+		solution  : REST API
+	data consistency:
+		In a microservices architecture, maintaining data consistency across services can be challenging
+		example: 
+		Scenario:
+				The OrderService creates an order.
+				The PaymentService processes the payment.
+				If the payment fails, the OrderService must cancel the order.
+		solution:
+		Saga Pattern: This involves breaking down a transaction into a series of smaller, isolated steps, each handled by a different service. Each step can be compensated by a rollback action if needed.
+
+	deployment complexity:
+		Deploying multiple microservices can lead to complexity, especially in managing their dependencies and scaling. Containerization with Docker and orchestration with Kubernetes can simplify this process.
+
+		Docker: Each microservice is packaged in a Docker container, ensuring it has all the dependencies it needs to run consistently across environments.
+
+		Kubernetes: This orchestration tool manages the deployment, scaling, and operation of Docker containers. It helps automate tasks like rolling updates, self-healing, and service discovery.
+
+
+index
+joins
+avoid select *
+
+
+
+# How do you optimize a Ruby on Rails application for performance?
+		Use Indexes: Ensure that your database queries are efficient by adding indexes to columns that are frequently used in WHERE clauses, JOINs, and ORDER BY statements.
+
+		Optimize Queries: Use tools like Bullet gem to identify N+1 query problems and reduce the number of database queries. Use includes, joins, or select to load only necessary records.
+
+		Database Connection Pooling: Use database connection pooling to efficiently manage database connections, especially in production environments.
+		---
+		Caching
+		Fragment Caching: Cache expensive fragments of views using Rails’ caching mechanisms. This allows parts of the views to be cached and reused.
+
+		Page Caching: For pages that do not change often, use page caching to serve static HTML files instead of hitting the Rails stack.
+
+		Action Caching: Cache the entire output of controller actions that do not change often.
+
+		Low-Level Caching: Use Rails.cache for caching expensive computations or data retrievals.
+		--
+		. Asset Optimization
+		Asset Pipeline: Use the Rails asset pipeline to combine and minify CSS and JavaScript files, reducing the number of requests made by the browser.
+
+		Use CDN: Serve static assets through a Content Delivery Network (CDN) to reduce latency and load times.
+
+		Image Optimization: Use image compression tools (e.g., ImageMagick, MiniMagick) to reduce image sizes without sacrificing quality.
+		--
+		Use Background Jobs: Offload long-running tasks (like sending emails or processing images) to background jobs using libraries like Sidekiq, Resque, or Delayed Job. This keeps your web response times fast.
+		--
+		Lazy Loading: Use lazy loading for heavy computations or data retrievals, 
+		ensuring that objects are loaded only when needed.
+
+# How would you optimize database queries in a Ruby application?
+		Use Batching for Large Data Sets
+			Optimize Database Queries with Joins
+		Use joins when you need to retrieve data from multiple tables. This can be more efficient than loading associated records separately.
+
+# What techniques do you use to profile and benchmark a Ruby application?
+	benchmark gem
+	MemoryProfiler gem
+
+
+# How would you optimize database queries in a Ruby application?
+	# Eager loading associations
+	users = User.includes(:posts).where(active: true)
+	# This loads all users and their associated posts in a single query
+
+
+# What are the common performance bottlenecks in Ruby applications and how do you address them?
+	1. N+1 Query Problem
+	2. Queries that take a long time to execute can slow down the application.
+	3. Heavy Object Creation: 
+	4. Creating a large number of objects, especially in loops, can lead to high memory usage and garbage collection (GC) overhead.
+
+
+# What strategies do you use for optimizing Ruby code for concurrency?
+	Use Multi-threading
+	Background Jobs
+
+
+#	resque 2.6.0 (for background jobs)
+Resque is a Redis-backed Ruby library for creating background jobs, placing those jobs on multiple queues, and processing them later. Background jobs can be any Ruby class or module that responds to perform. Your existing classes can easily be converted to background jobs or you can create new classes specifically to do work. Or, you can do both. Resque is heavily inspired by DelayedJob (which rocks) and is comprised of three parts: * A Ruby library for creating, querying, and processing jobs * A Rake task for starting a worker which processes jobs * A Sinatra app for monitoring queues, jobs, and workers.
+
+
+# RabbitMQ
+RabbitMQ is an open source message broker, and it is used to create messaging applications. This is very useful if you want to communicate two or more microservices asynchronously
+
+There are more questions on this on chat gpt
+
+Example Workflow
+Producer: A payment service publishes a message about a completed transaction.
+Exchange: Routes the message to the appropriate queues:
+A queue for updating the user's order status.
+A queue for sending an email receipt.
+Queues: Hold messages until the respective consumers process them.
+Consumers:
+An order service updates the database.
+An email service sends a receipt to the user.
+
+continuous integration.
+
+
+# what is apache solr (search engine)
+	

@@ -1,0 +1,36 @@
+links
+https://www.toptal.com/javascript/interview-questions
+
+
+
+guess the output: 
+
+Q. 1 about proxy: 
+const handler = {
+  
+  get(target, name) {
+
+    return name in target ? target[name] : 42;
+  },
+};
+
+const p = new Proxy({}, handler);
+p.b = 1;
+
+console.log(p.a,p.b)
+
+Q2.
+function foo1()
+{
+  return {
+      bar: "hello"
+  };
+}
+
+function foo2()
+{
+  return
+  {
+      bar: "hello"
+  };
+}

@@ -1,0 +1,99 @@
+🔸 Intermediate to Advanced ActiveRecord Practice Questions
+
+
+To retrieve books that:
+* have multiple authors,
+* at least one author's name starts with "Ki", and
+* the book's color is red,
+
+
+Book
+  .joins(:authors)
+  .where(color: 'red')
+  .where('authors.name LIKE ?', 'Ki%')
+  .group('books.id')
+  .having('COUNT(authors.id) > 1')
+
+  --------
+
+  4. Fetch all users who have not placed any orders
+  User.left_outer_joins(:orders).where(orders: { id: nil })
+  --------
+  5. Get all products with more than 10 reviews and average rating > 4
+  Product.joins(:reviews).where('reviews.rating > 4').group('products.id').having('COUNT(reviews.id) > 10')
+  --------
+  6. Get users who have placed orders with a total amount over ₹1000
+    User.joins(:orders)
+    .group("users.id")
+    .having("SUM(orders.total_amount) > 1000")
+  --------
+  7. Fetch all users along with their latest order
+   User.joins(:orders).order("orders.created_at DESC")
+  --------
+  Find all categories with more than 5 products, and those products have been purchased more than 100 times combined
+  Category.joins(:products).where('products.id IN (SELECT product_id FROM order_items GROUP BY product_id HAVING COUNT(*) > 100)').group('categories.id').having('COUNT(*) > 5')
+  --------
+  Write a custom SQL query to fetch top 3 selling products
+  Product.find_by_sql("
+  SELECT products.*, SUM(order_items.quantity) AS total_sold
+  FROM products
+  JOIN order_items ON order_items.product_id = products.id
+  GROUP BY products.id
+  ORDER BY total_sold DESC
+  LIMIT 3
+")
+  --------
+  11. Find users who signed up in the last 7 days and haven't placed any orders yet
+  User.left_outer_joins(:orders)
+    .where("users.created_at >= ?", 7.days.ago)
+    .where(orders: { id: nil })
+
+12. Get all posts with more than 100 likes and at least one comment
+Post.joins(:likes, :comments)
+    .group("posts.id")
+    .having("COUNT(DISTINCT likes.id) > 100 AND COUNT(DISTINCT comments.id) >= 1")
+
+  --------
+13. Fetch users who placed at least one order in every month of the current year
+
+User.joins(:orders)
+    .where("orders.created_at >= ?", Date.current.beginning_of_year)
+    .group("users.id")
+    .having("COUNT(DISTINCT DATE_TRUNC('month', orders.created_at)) = ?", Date.current.month)
+
+  --
+  
+  14. Find top 5 users who have spent the most in total
+  User.joins(:orders)
+    .select("users.*, SUM(orders.total_amount) AS total_spent")
+    .group("users.id")
+    .order("total_spent DESC")
+    .limit(5)
+------
+15. Get all employees who report to the same manager
+Employee.where(manager_id: Employee.select(:manager_id).group(:manager_id).having("COUNT(*) > 1"))
+  -------
+  16. Fetch all blog posts that have no tags
+  Post.left_outer_joins(:tags).where(tags: { id: nil })-
+  --------
+  17. Get all customers who have ordered both ‘Pizza’ and ‘Burger’
+  17. Get all Customer.joins(:orders => :products)
+        .where(products: { name: ['Pizza', 'Burger'] })
+        .group("customers.id")
+        .having("COUNT(DISTINCT products.name) = 2")
+  --------
+  20. Find products not ordered in the last 30 days
+  Product.left_outer_joins(:order_items)
+       .where("order_items.created_at IS NULL OR order_items.created_at < ?", 30.days.ago)
+
+
+  --------
+  --------
+  --------
+  --------
+  --------
+  --------
+  --------
+  --------
+  --------
+  --------

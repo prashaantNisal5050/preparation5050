@@ -1,0 +1,80 @@
+"I’m a software engineer with over 4 years of hands-on experience working with Ruby on Rails. I’ve developed and maintained full-stack web applications, primarily in the e-commerce and data-heavy domains, and I’m currently focused on building scalable backend systems. I enjoy writing clean, testable code and have a strong grasp of Rails internals, RESTful API development, and working with both SQL and NoSQL databases like PostgreSQL and MongoDB."
+
+"In my current role at Dassault Systems, I’m involved in migrating systems from MySQL to an in-house distributed database, and I'm building a Ruby adapter gem to support that migration. Beyond Rails, I have solid frontend experience with HTML, CSS, and JavaScript, and I’ve recently started working with React to deepen my full-stack capabilities. I’m a collaborative team player with a proactive attitude and strong debugging skills. I'm excited about the opportunity at Parity Cube because I enjoy working on high-traffic systems that impact real users at scale."----
+
+about yourself.
+
+
+
+I’m Prashant Nisal, born and raised in Pune, 
+where I completed my MCA from Pune University in 2014. 
+
+I have 10 years of experience in IT, with the last 6 years focused on Ruby on Rails development.
+
+Current Role & Project:
+Currently, I’m working as a Software Engineer at Dassault Systems,
+
+I am part of the database driver development team, where we are working on migrating applications from MySQL to our in-house NuoDB solution to optimize costs and performance. As part of this initiative, I am developing a Ruby gem that acts as a database adapter, enabling  connectivity between Ruby on Rails applications and NuoDB—similar to how the mysql2 or pg gems function.
+
+Past Experience:
+Before this, I worked as a web developer in the medical & health relathed  projects.
+
+My technical expertise includes:
+Ruby on Rails for web application development
+Databases like MySQL, PostgreSQL, and NuoDB
+API development and testing
+Frontend technologies like HTML, CSS, JavaScript, and jQuery
+Apart from work, I enjoy exploring new technologies, and recently, I’ve been learning ReactJS to expand my full-stack development capabilities.
+
+Looking forward to connecting and sharing knowledge. Thank you!
+
+------
+
+About Current role/projects:
+
+We have our own database, NuoDB, and several Ruby on Rails applications in the medical domain.
+The company decided to migrate from MySQL to NuoDB to reduce costs.
+However, there was no existing solution to enable integration between Ruby on Rails applications and NuoDB. 
+To address this gap, I took initiative to create a custom Ruby gem, a database driver, allowing Ruby on Rails applications to connect to and interact with NuoDB efficiently."
+
+let me summarise this discussion in short:
+I have been developing a gem called "Ruby on Rails Adapter for NuoDB Databases" which is simmiler to mysql2 or pg gems.
+This project showcased my expertise in Ruby, Ruby on Rails, ActiveRecord, and database integrations and ability to take ownership. (optional)
+
+challenges in current project:
+  1.Handling NuoDB-Specific SQL Features
+  NuoDB has different SQL syntax and behavior compared to MySQL/PostgreSQL, especially in areas like indexing, transaction handling, and autoincrement behavior. Some ActiveRecord queries that work with MySQL do not execute correctly on NuoDB.
+
+
+learnings from current project:
+
+
+
+
+
+
+
+
+
+
+
+
+
+For the past 4 years, I've been working as a software developer at Dassault Systemes.
+
+In my role, I’ve had the opportunity to design, develop a ruby on rails gem from scratch.
+I'm skilled in working with databases like MySQL and PostgreSQL.
+
+
+I'm currently working on a ruby on rails technology where I’m developing a database driver and ActiveRecord adapter to connect Ruby applications to our in-house database.
+I can explain this further if you'd like
+
+Current Goal:
+I’m now looking for a position that allows me to build on my skills in Ruby on Rails, web development, and database management, where I can make meaningful contributions and continue to grow in my career.
+
+
+
+
+
+
+

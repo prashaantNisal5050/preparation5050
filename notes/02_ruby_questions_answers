@@ -1,0 +1,478 @@
+OPPS : write in ruby
+
+1 classes
+2 objects
+3 Encapsulation: attr_accessor
+4 polimorphism : overloading , overriding
+5 inheritance
+6 abstraction 
+
+Q1:3 WAYS TO CALL ANY METHOD
+
+class Person
+  def say
+    'hello!'
+  end
+end
+
+jack = Person.new
+jack.say  # Obvious way
+
+jack.send(:say)  # You can send the method name:
+jack.public_send(:say)
+
+jack.method(:say).call # Maybe you want to grab the method, and then call it like a proc:
+
+jack.instance_eval { say } using instance_eval.
+---------------------------
+Q2:CLOSURES OR BLOCK VS LAMBDA VS PROC (KEYWORDS : 
+LA ->LAMBDA IS STRICT ABOUT ARGS,PR- PR IS STRICT ABOUT RETURN)
+	https://medium.com/@AdamKing0126/ruby-whats-the-deal-with-procs-and-lambdas-165450cdf573
+
+	Blocks, Procs, and Lambdas are all closures, but only Procs and Lambdas are objects. 
+	
+	A method may only accept one block, but can be written to accept any number of Procs. 
+
+	Methods can also return a Proc or a Lambda as well. They can’t do that with blocks.
+
+	closures? https://www.sitepoint.com/closures-ruby/
+	1.Can be treated like a variable, i.e. assigned to another variable, passed as a method argument, etc.
+	2.Remembers the values of all the variables that were in scope when the function was defined and is able to access these variables even if it is executed in a different scope.
+
+	
+
+BLOCK:
+ You can think of blocks as simply a chunk of code,
+ and yield allows you to inject that code at some place into a method.
+ That means you can have one method work in different ways, you don’t have to write multiple methods
+ (you can reuse one method to do different things).
+
+ def greet
+  puts "Hello, before the block!"
+  yield if block_given? # Check if a block is given and execute it
+  puts "Hello, after the block!"
+end
+
+# Call the method with different blocks
+# o/p : Hello, before the block!
+# This is the block content!
+# Hello, after the block!
+greet do
+  puts "This is the block content!"
+end
+
+# Without providing a block
+# Hello, before the block!
+# Hello, after the block!
+
+greet
+
+PROC:
+	The simplest way to understand procs (short for procedures) is when you save your blocks to a variable, it is called a proc.
+
+TWO MAJOR DIFFERENCE BETWEEN LAMBDA AND PROC:
+	1.Lambda raises exception if the number of arguments are wrong, while procs do not
+	2.Lambda and procs treat the ‘return’ keyword differently
+		If we do return within a lambda, it would just return from lambda and the method will continue.
+		If we do return within a proc, it would exit the method where your proc is.
+
+
+# Lambda example
+lambda_example = ->(x, y) { return x * y }
+puts lambda_example.call(3, 4)   # Output: 12
+puts "After lambda call" # this will execute
+
+# Proc example
+proc_example = Proc.new { |x, y| return x * y }
+puts proc_example.call(3, 4)      # Output: 12
+puts "After proc call" # won't execute
+
+
+YIELD:
+	So basically when the execution of method reaches the line with the call to yield, the code inside the block gets executed. Then, when the code inside the block finishes, the execution of the method continues.
+
+
+---------------------------
+What is Concern?
+Concerns help in keeping code DRY (Don't Repeat Yourself)
+The Concern is a tool provided by the ActiveSupport lib for including modules in classes, creating mixins.
+
+Concerns allow you to use #included and #class_methods instead of self.included hook with additional module ClassMethods creation;
+
+example: https://www.sitepoint.com/rubymine-code-insight-for-ruby-and-rails/
+
+	Drawbacks?
+		1.Now imagine a class with 10 concerns, lots of method calls and not-so-meaningful names. Following the execution flow can be quite hard, and we may find ourselves doing searches to find out where's the method we are calling.
+
+		2.Bi-directional dependencies- The class Document depends on the Printable concern. But, equally, the Printable concern knows implementation details of Document.
+		bi-directional dependencies should be avoided.The knowledge should flow one way only.
+
+		3.Triangular dependencies:
+
+	A good concern should be able to work in isolation, so it must be dependency-free.
+
+	it’s hard to say what problem concerns solve. Every problem that concerns solve can be solved with composition or aggregation. Better than that, composition/aggregation solve the same problem but explicitly.
+
+---------------------------
+
+https://medium.com/@carlescliment/about-rails-concerns-a6b2f1776d7d
+Concerns are supported by Rails 3 but will become more ‘official’ in Rails 4
+
+
+https://stackoverflow.com/questions/14541823/how-to-use-concerns-in-rails-4  (do demo of it)
+Ruby Mixins & ActiveSupport::Concern
+http://engineering.appfolio.com/appfolio-engineering/2013/06/17/ruby-mixins-activesupportconcern
+---------------------------
+Q3: METHOD LOOKUP: https://www.youtube.com/watch?v=TZWQAvlMru8
+
+read Digram from 
+https://www.brainstobytes.com/ruby-modules/
+
+Ask the object if its singleton class can respond to the method, calling it if found.
+Ask the object’s parent class if it can respond to the method, calling it if found.
+Ask the next parent class up if it can respond to the method and call it if found, continuing this step towards the top of the inheritance chain for as long as necessary.
+If nothing in the inheritance chain can respond to the method being called, the method does not exist and an Exception should be raised.
+
+search the method in
+	1.singleton Module
+	2.prepended Module
+	3.Klass
+	4.included Module
+	5.superclass
+
+abt singlton http://leohetsch.com/demystifying-ruby-singleton-classes/
+
+---------------------------
+Q4: Is everything an object in ruby? true or false
+	-true! Practically everything in Ruby is an Object, with the exception of control structures.
+
+	eg p 12.class ,12.methods -> 
+---------------------------
+https://www.honeybadger.io/blog/ruby-self-cheat-sheet/
+who is self in below scenario
+
+	Inside of an instance method 	-> 	So self points to that object.
+	Inside of a class Method 		-> 	self points to the class.
+	Inside of a class definition 	->	self points to the class. 
+	Inside of a module definition 	->	self points to the module.
+	Inside mixin methods 			->	its self is the instance of the class it was mixed into. 
+	Inside the metaclass 			->	self is the metaclass
+	Outside of any class 			->	It points to "main", which is an instance of Object
+	class << self 					-> 	"#<Class:#<Object:0x0000000092a630>>"	
+    	p self.inspect
+	end
+
+also read http://lizabinante.com/blog/modules-and-self-in-ruby/
+
+and make notes in free time 
+---------------------------
+Q5: why modules?
+why?
+	With modules you can share methods between classes: Modules can be included into classes, and this makes their methods available on the class, just as if we’d copied and pasted these methods over to the class definition.
+
+	This is useful if we have methods that we want to reuse in certain classes, but also want to keep them in a central place, so we do not have to repeat them everywhere.
+
+	Modules are a way of grouping together methods, classes, and constants. Modules give you two major benefits.
+	1. Modules provide a namespace and prevent name clashes.
+	2. Modules implement the mixin facility/multiple inheritance
+CLASSES VS MODULE VS MIXIN (module puzzles in details)
+	* module is a namespace.
+		A namespace is a container to hold things like functions, classes and constants as a way to group them together logically and to help avoid conflicts with functions and classes with the same name that have been written by someone else.
+
+	* namespace allows us to use a class name which don't conflict
+
+	1.module is a library of methods.
+	2.modules can be used to mix-in common behavior into classes.
+	* mixins are "virtual classes" that have been injected in a class's or module's ancestor chain.
+	3.You can only subclass from one class. But you can mix in as many modules as you'd like.
+	4.mix in === to achive multiple inheritance
+		you can simple group the common functionality into a Module and then include it into each Class that requires it.
+	5.it s a namespace.namespacing means organizing similar classes under a module
+	6.can we create class inside module? yes module can contain classes.
+	7.can we create module inside module? yes module can contain module.
+	8.module cannot instatntiate.class can instantiate
+	9.can we create module inside class? yes.
+
+include vs extends vs PREPEND? 
+  INCLUDE
+    Ruby will insert the module into the ancestors chain of the class
+    make module method availible to class instance(Person.new)
+
+  EXTEND
+    Ruby will insert the module in the ancestors chain of the singleton class of the {Service} class
+    make module method availible to class itself(Person)(these method goes into singltone class.)
+
+  PREPEND
+    same as INCLUDE,it will search method into the modules first before looking into the class.
+
+---------------------------
+Q6: META PROGRAMMING: instance_eval and class_eval
+https://www.jimmycuadra.com/posts/metaprogramming-ruby-class-eval-and-instance-eval/
+https://www.toptal.com/ruby/ruby-metaprogramming-cooler-than-it-sounds
+
+
+def : 
+Metaprogramming is a technique by which you can write code that writes code by itself dynamically at runtime. 
+
+This means you can define methods and classes during runtime.
+using metaprogramming you can reopen and modify classes, catch methods that don’t exist and create them on the fly.
+
+<!-- class_eval creates instance methods. Person.new.m1 # ✅ Works, Person.m1 # ❌ NoMethodError
+instance_eval creates class methods. Person.m1 -->
+
+
+| Method          | Used on      | Adds method to        | Example usage                      |
+| --------------- | ------------ | --------------------- | ---------------------------------- |
+| `class_eval`    | Class/Module | **Instance methods**  | `Person.new.m1`                    |
+| `instance_eval` | Class        | **Class methods**     | `Person.m1`                        |
+| `instance_eval` | Instance     | **Singleton methods** | `person.m1` (only for that object) |
+
+
+class_eval allows us to define a method within the Person class outside of its original definition and without reopening the class with the standard syntax. This could be useful when the class you want to add this method to is not known until runtime.
+---------------------------
+Q7: Method_access:
+-in all OOPs languages, private methods are not inherited from the parent class. But in ruby, private methods are also inherited just like public and protected are.
+-We can access the public method outside the class they were defined in, but we cant access the protected and private outside the classes they were defined in.
+-
+Public : Can be called from outside the class.
+Protected : Can be called from outside only by the defining class or its subclasses.
+Private Can be called only from inside the defining class by the definind class or its subclasses.
+
+---------------------------
+Q8:OOPS IN RUBY PROGRAM LIKE JAVA. which concepts are differnt?
+private methods are also inherited in ruby language.
+
+
+---------------------------
+Q8: LOAD_PATH,REQUIRE,REQUIRE_RELATIVE
+'require' and 'load' are used to include external files in Ruby
+
+1. 'require' loads a file only once per Ruby runtime.
+2. 'load', on the other hand, includes the specified file every time it is called, 
+3. We use require_relative for this because the location of the file we're loading is relative to the file we're loading it from - they're both in the same directory.
+---------------------------
+Q9: VARIABLE TYPES IN RUBY
+	shares accross the all its super class and subclass. When you set a class variable, you set it for the superclass and all of the subclasses
+
+
+	class var vs instance var
+	-Class variables are shared by all objects of a class, Instance variables belong to one object
+	
+	class method vs instance method
+	-You should use Class Methods when the functionality you are writing does not belong to an instance of that class.
+	
+	account.deposit(500) or account.withdraw (500) , it belongs to account instance.
+	but  BankAccount.total_accounts , this is belongs to class.
+
+	symbole vs strings
+	- Symbols are immutable. Mutable(changeble) objects can be changed after assignment while immutable objects can only be overwritten.
+	- Regardless of how many times you call the object_id, the memory location of the object is the same.
+	- how to find object id : User.first.object_id
+
+---------------------------
+Q10: nil vs empty vs blank? , symbole vs string
+
+	https://stackoverflow.com/questions/885414/a-concise-explanation-of-nil-v-empty-v-blank-in-ruby-on-rails
+
+	.nil? can be used on any object and is true if the object is nil.
+
+	.empty? can be used on strings, arrays and hashes and returns true if:
+
+	String length == 0
+	Array length == 0
+	Hash length == 0
+	Running .empty? on something that is nil will throw a NoMethodError.
+
+	That is where .blank? comes in. It is implemented by Rails and will operate on any object as well as work like .empty? on strings, arrays and hashes.
+---------------------------
+Q11: pass-by-value-or-pass-by-reference
+http://rubyblog.pro/2017/09/pass-by-value-or-pass-by-reference
+-------------------
+DATA-STRCTURE PROGRAMS
+Q1. gsub vs sub? global_stubstitute
+	 Well, sub is the same as gsub, but it will only replace the first match.
+-------------------
+Q12. map vs collect
+Conclusion
+In Ruby difference between collect and map does not exist.
+C level implementation of these methods shows that they both are same. Collect is an alias to Map. 
+
+-------------------
+Q13. monkey patch vs duck typing
+Duck Typing' is a concept where the type or class of an object is less important than the methods it defines or the behavior it exhibits. The name comes from the saying, 'If it looks like a duck and quacks like a duck, it's a duck.'
+
+Monkey patching is when you ‘open’ and modify an already existing class dynamically.  (its dangerous)
+
+https://www.quora.com/In-Ruby-what-is-duck-typing-and-monkey-patching-What-are-the-technical-and-usage-differences-between-them
+
+
+
+Other 
+read also
+https://stackoverflow.com/questions/12084507/what-does-the-map-method-do-in-ruby
+https://docs.ruby-lang.org/en/2.0.0/Array.html
+https://www.rubyguides.com/2018/01/ruby-string-methods
+very good site
+https://lab.hookops.com/ruby-interview-prep.html
+
+
+opps resorces
+https://launchschool.com/books/oo_ruby/read/inheritance#accidentalmethodoverriding
+http://zetcode.com/lang/rubytutorial/oop/
+https://bparanj.gitbooks.io/ruby-basics/content/part3/modeling_the_real_world.html
+
+----
+
+try to access class and instance variable without method in ruby
+
+class MyClass
+  @@class_variable = "I am a class variable"
+  def initialize
+    @instance_variable = "I am an instance variable"
+  end
+
+  def self.get_class_variable
+    @@class_variable
+  end
+end
+
+# Accessing class variable without a method
+puts MyClass.class_variable_get(:@@class_variable) # Output: I am a class variable
+
+# Accessing instance variable without a method (not possible outside class scope)
+# puts MyClass.instance_variable_get(:@instance_variable) # This will throw a NameError
+
+# Accessing instance variable using a method
+obj = MyClass.new
+puts obj.instance_variable_get(:@instance_variable) # Output: I am an instance variable
+
+# Accessing class variable using a method
+puts MyClass.get_class_variable # Output: I am a class variable
+-----
+
+method lookup
+Inheritance
+
+josh
+cookies and session
+database queries join,index
+project explain
+Gem used
+Devise Gem
+anguler basics
+routes read full page.
+API in rails.
+best practices
+performance issues
+
+meta programming
+singleton design pattern'
+'
+https://www.toptal.com/ruby/interview-questions'
+https://www.learneroo.com/modules/61/nodes/337
+https://www.rubyguides.com/2019/04/ruby-data-structures/
+https://www.rubyguides.com/2018/01/ruby-string-methods/#How_to_Replace_Text_Inside_a_String_Using_The_Gsub_Method
+
+https://github.com/kumar91gopi/Algorithms-and-Data-Structures-in-Ruby#stacks
+
+good website
+https://www.codementor.io/blog/ruby-on-rails-interview-questions-du107w0ss
+
+
+https://github.com/nick-brown/ruby-interview-questions
+
+callbak or validation first?
+Validations are called first to ensure data integrity.
+Callbacks are called afterward if validations succeed, allowing you to perform additional logic (like modifying attributes) before saving to the database.
+
+before_validation
+after_validation
+before_save
+around_save (before)
+  before_update
+  around_update (before)
+    -- UPDATE SQL --
+  around_update (after)
+  after_update
+around_save (after)
+after_save
+after_commit
+
+
+If user.name is nil, the presence validation will fail, and the before_save callback (normalize_name) won’t be called.
+If user.name is present, the validation will pass, and the before_save callback will run, allowing normalize_name to modify the name before saving it.
+
+----
+
+What is sql injection?
+what is JOB OF ORM?
+Query optimization apporch? 
+opps? in ruby?
+Concern vs module?
+sequrity in rails?
+CSRF: Cross-Site Request Forgery
+https://medium.com/rubyinside/a-deep-dive-into-csrf-protection-in-rails-19fa0a42c0ef
+
+
+programs
+https://www.faceprep.in/pattern-programs-in-c/
+
+interpreter
+https://scoutapm.com/blog/ruby-interpreters-what-you-need-to-know
+
+
+HashWithIndifferentAccess
+
+https://rubyquicktips.com/post/603292403/accessing-a-hash-with-either-string-or-symbol-keys
+
+
+
+
+ruby Enumerable methods
+
+1. Traversal and Searching
+each: Iterates over each element.
+each_with_index: Iterates with the index of each element.
+find / detect: Returns the first element that matches a condition.
+find_index: Returns the index of the first element that matches a condition.
+select / filter: Returns elements that match a condition.
+reject: Returns elements that do not match a condition.
+all?: Checks if all elements satisfy a condition.
+any?: Checks if any element satisfies a condition.
+none?: Checks if no elements satisfy a condition.
+one?: Checks if exactly one element satisfies a condition.
+2. Transformation
+map / collect: Transforms each element and returns a new collection.
+flat_map: Maps and flattens the result.
+reduce / inject: Accumulates a single value from elements.
+compact: Removes nil values from the collection.
+3. Sorting
+sort: Returns a new array sorted in ascending order.
+sort_by: Sorts elements by a specified criterion.
+min / max: Finds the smallest/largest element.
+min_by / max_by: Finds the smallest/largest element by a criterion.
+4. Partitioning and Grouping
+partition: Splits elements into two groups based on a condition.
+group_by: Groups elements by a specified criterion.
+5. Counting
+count: Counts elements or those that match a condition.
+tally: Counts the occurrences of each element.
+6. Filtering
+drop: Skips the first n elements.
+drop_while: Skips elements while a condition is true.
+take: Takes the first n elements.
+take_while: Takes elements while a condition is true.
+7. Combining
+zip: Combines elements from multiple enumerables.
+cycle: Iterates over elements infinitely, a specified number of times.
+8. Set Operations
+uniq: Removes duplicate elements.
+intersection: Returns elements common to multiple enumerables.
+union: Combines all elements, removing duplicates.
+difference: Returns elements not common to other enumerables.
+9. Other Useful Methods
+first / last: Retrieves the first/last element(s).
+include?: Checks if a collection includes a specific element.
+each_slice: Iterates over slices of elements.
+each_cons: Iterates over consecutive elements.
+lazy: Enables lazy evaluation for infinite collections.

@@ -1,0 +1,51 @@
+SQL questions: 
+sql engin? trigger? procedure
+
+https://techbeamers.com/sql-query-questions-answers-for-practice/
+
+q1: max second salary
+  way 1 : use subquery
+  SELECT MAX(SALARY) FROM Employee WHERE SALARY < (SELECT MAX(SALARY) FROM Employee); 
+  way 2: duplication
+  ( SELECT MAX(Salary) FROM Employee WHERE Salary NOT IN (SELECT MAX(Salary) FROM Employee )) as 2nd_max_salary
+  way 3 : using offset and limit
+
+  way 3
+
+  SELECT Salary
+  FROM Worker W1
+  WHERE n-1 = (
+  SELECT COUNT( DISTINCT ( W2.Salary ) )
+  FROM Worker W2
+  WHERE W2.Salary >= W1.Salary
+  );
+
+q2: questions on group by , having clause
+
+Q3: How to invert/flip the values of a TinyInt or Boolean column in MySQL
+mysql> select * from human_values;
++----+-------------+-------------+
+| id | human_value | is_optional |
++----+-------------+-------------+
+|  1 | honesty     |           1 |
+|  2 | tolerance   |           1 |
+|  3 | patience    |           1 |
+|  4 | hatred      |           0 |
++----+-------------+-------------+
+4 rows in set (0.00 sec)
+
+mysql> UPDATE human_values 
+    -> SET `is_optional` = NOT `is_optional`;
+Query OK, 4 rows affected (0.01 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from human_values;
++----+-------------+-------------+
+| id | human_value | is_optional |
++----+-------------+-------------+
+|  1 | honesty     |           0 |
+|  2 | tolerance   |           0 |
+|  3 | patience    |           0 |
+|  4 | hatred      |           1 |
++----+-------------+-------------+
+4 rows in set (0.00 sec)

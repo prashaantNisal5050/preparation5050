@@ -1,0 +1,63 @@
+notes: 
+
+9 years 3 months
+Service History
+
+DASSAULT SYSTEMES SOLUTIONS LAB PRIVATE LIMITED
+Joining Date 11-May-2020  
+Total Service 4 Years 3 Months
+
+
+FORGEAHEAD SOLUTIONS PRIVATE LIMITED
+Joining Date 04-Apr-2016
+Exit Date 10-Apr-2020
+Total Service 4 Years 0 Months
+
+ISS 1 year oct 2014 - oct 2015
+
+quantify your achievements where possible in %
+---
+
+2014 MCA passout
+
+Total EXP 8.5
+
+oct 2014- oct   2015 iss (1)
+apr 2016- march 2020 forgeahead (4)
+may 2020,2022 - medidata (2)
+Jan 2023-2024 - nuodb (1.5)
+---
+Experience:
+
+Business Title: NuoDB R&D Drivers Software Engineering Specialist
+Role: Software Engineer
+
+current Project summury
+
+database Driver and adapter
+
+goal:
+The company aims to migrate all applications from MySQL to an in-house NuoDB solution in order to reduce costs.
+
+My role and contributions:
+there wasn't an exclusive Ruby database driver for the NuoDB database, I took the initiative to develop a driver and active record adapter to enable Ruby applications to seamlessly connect and interact with the NuoDB database.
+
+crafted a wrapper utilizing FFI to establish connections to Nuodb, execute queries, and iterate over the returned results
+
+created custom adapter to connect Rails applications to nuodb.
+-----
+
+
+SKILLS HIGHLIGHTS : 
+proficiency in Ruby programming language, 
+Ruby on Rails framework, 
+databases like MySQL or PostgreSQL, Nuodb
+web development technologies (HTML, CSS, JavaScript),
+testing frameworks (RSpec, Minitest), 
+version control systems (Git)
+
+
+
+
+
+

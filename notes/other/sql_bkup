@@ -1,0 +1,1130 @@
+bkup
+
+
+notes:
+
+- non aggrigated column should be grouped by
+
+
+
+-- --------*********-----------
+# midium complex problems
+-- --------*********-----------
+
+
+-- 1 find player with no of gold medals won by them only for players who won only gold medals.
+
+
+CREATE TABLE ORG.events (
+ID int,
+event varchar(255),
+YEAR INt,
+GOLD varchar(255),
+SILVER varchar(255),
+BRONZE varchar(255)
+);
+
+INSERT INTO org.events VALUES (1,'100m',2016, 'Amthhew Mcgarray','donald','barbara');
+INSERT INTO org.events VALUES (2,'200m',2016, 'Nichole','Alvaro org.Eaton','janet Smith');
+INSERT INTO org.events VALUES (3,'500m',2016, 'Charles','Nichole','Susana');
+INSERT INTO org.events VALUES (4,'100m',2016, 'Ronald','maria','paula');
+INSERT INTO org.events VALUES (5,'200m',2016, 'Alfred','carol','Steven');
+INSERT INTO org.events VALUES (6,'500m',2016, 'Nichole','Alfred','Brandon')
+INSERT INTO org.events VALUES (7,'100m',2016, 'Charles','Dennis','Susana');
+INSERT INTO org.events VALUES (8,'200m',2016, 'Thomas','Dawn','catherine');
+INSERT INTO org.events VALUES (9,'500m',2016, 'Thomas','Dennis','paula');
+INSERT INTO org.events VALUES (10,'100m',2016, 'Charles','Dennis','Susana');
+INSERT INTO org.events VALUES (11,'200m',2016, 'jessica','Donald','Stefeney');
+INSERT INTO org.events VALUES (12,'500m',2016,'Thomas','Steven','Catherine');
+
+-- using subquery
+SELECT gold as player_name,COUNT(1) as no_of_medals 
+from ORG.events e
+where gold not in ( select SILVER from ORG.events union all select BRONZE from ORG.events)
+group by gold;
+
+
+-- using union all 3  12(rows)*3(type) = 36 rows # not working in mysql
+
+with cte as (
+select gold as 'player name' ,'gold' as medal_type from events
+union all select SILVER ,'silver' as medal_type from events
+union all select BRONZE ,'bronze' as medal_type from events
+)
+select player_name, count(1) as no_of_gold_medals from cte
+group by player_name
+having count(distinct medal_type) =1 and max(medal_type) = 'gold'
+
+-- --------*********-----------
+-- 2. find difference between 2 dates excluding weekends and public holidays  . Basically we need to find business days between 2 given dates using SQL.
+
+create table tickets1
+(
+ticket_id varchar(10),
+create_date date,
+resolved_date date
+);
+
+
+insert into tickets1 values
+(1,'2022-08-01','2022-08-03')
+,(2,'2022-08-01','2022-08-12')
+,(3,'2022-08-01','2022-08-16');
+
+
+create table holidays
+(
+holiday_date date
+,reason varchar(100)
+);
+
+insert into holidays values
+('2022-08-11','Rakhi'),('2022-08-15','Independence day');
+
+
+ 2022-08-01|MON   2022-08-03|wednesday
+ 2022-08-01|MON   2022-08-12|friday
+ 2022-08-01|MON   2022-08-16|tuesday
+ 
+-- SELECT *, 
+-- DATEDIFF(resolved_date, create_date) AS days_difference, 
+-- WEEK(create_date) as week_start,week(resolved_date) as end_week ,
+-- TIMESTAMPDIFF(WEEK, create_date, resolved_date) AS weeks_difference
+-- FROM tickets1;
+ 
+--  ticket_id|create_date|resolved_date|days_difference|week_start|end_week|weeks_difference|
+-- ---------+-----------+-------------+---------------+----------+--------+----------------+
+-- 1        | 2022-08-01|   2022-08-03|              2|        31|      31|               0|
+-- 2        | 2022-08-01|   2022-08-12|             11|        31|      32|               1|
+-- 3        | 2022-08-01|   2022-08-16|             15|        31|      33|               2|
+
+ 
+
+-- SELECT *, 
+-- DATEDIFF(resolved_date, create_date) AS actual_days,
+-- DATEDIFF(resolved_date, create_date) - 2*TIMESTAMPDIFF(WEEK, create_date, resolved_date) as working_days # 2 days off in every weeks
+-- from tickets1
+-- left join holidays on holiday_date between create_date and resolved_date;
+
+
+SELECT ticket_id, 
+       create_date, 
+       resolved_date, 
+       holidays, 
+       actual_days,
+       actual_days - (2 * TIMESTAMPDIFF(WEEK, create_date, resolved_date) + holidays) AS working_days # 2 days off in every week
+FROM (
+    SELECT t.ticket_id, 
+           t.create_date, 
+           t.resolved_date, 
+           COUNT(h.holiday_date) AS holidays,
+           DATEDIFF(t.resolved_date, t.create_date) AS actual_days
+    FROM tickets1 t
+    LEFT JOIN holidays h 
+           ON h.holiday_date BETWEEN t.create_date AND t.resolved_date
+           AND WEEKDAY(h.holiday_date) NOT IN (5, 6) -- Exclude holidays that fall on weekends (Saturday=5, Sunday=6) -- to remove this drawback : what if public holiday is on weekend.
+    GROUP BY t.ticket_id, t.create_date, t.resolved_date
+) AS sub;
+ 
+select * from holidays; 
+
+-- --------*********-----------
+# Complex sql problems 
+-- --------*********-----------
+
+-- 1. Derive Points table for ICC tournament
+
+create table icc_world_cup
+(
+Team_1 Varchar(20),
+Team_2 Varchar(20),
+Winner Varchar(20)
+);
+
+
+INSERT INTO icc_world_cup values('India','SL','India'),('SL','Aus','Aus'),('SA','Eng','Eng'),('Eng','NZ','NZ'),('Aus','India','India');
+
+select team_name, count(1) as no_of_matches_played, sum(win_flag) as win_matches, count(1) - sum(win_flag) as losses  from 
+(
+select team_1 as team_name, 
+case 	when team_1 = winner then 1 
+		else 0 end as win_flag
+from icc_world_cup
+union all
+select team_2 as team_name, 
+case 	when team_2 = winner then 1 
+		else 0 end as win_flag
+from icc_world_cup ) A
+group by team_name
+order by win_matches desc;
+
+-- Expected Output : 
+-- team_name|no_of_matches_played|win_matches|losses|
+-- ---------+--------------------+-----------+------+
+-- India    |                   2|          2|     0|
+-- SL       |                   2|          0|     2|
+-- SA       |                   1|          0|     1|
+-- Eng      |                   2|           1|     1|
+-- Aus      |                   2|          1|     1|
+-- NZ       |                   1|          1|     0|
+
+-- --------*********-----------
+
+-- Complex SQL 2 | find new and repeat customers 
+
+-- hint:  min(order_date) is customer's first visit. comapare first_visit with order_date. if matched means its a new customer. 
+
+create table customer_orders (
+order_id integer,
+customer_id integer,
+order_date date,
+order_amount integer
+);
+ 
+
+insert into customer_orders values(1,100,cast('2022-01-01' as date),2000),(2,200,cast('2022-01-01' as date),2500),(3,300,cast('2022-01-01' as date),2100)
+,(4,100,cast('2022-01-02' as date),2000),(5,400,cast('2022-01-02' as date),2200),(6,500,cast('2022-01-02' as date),2700)
+,(7,100,cast('2022-01-03' as date),3000),(8,400,cast('2022-01-03' as date),1000),(9,600,cast('2022-01-03' as date),3000)
+;
+
+select * from customer_orders;
+
+
+with fisrt_visit as (select customer_id, min(order_date) as first_visit from customer_orders
+group by customer_id)
+SELECT co.*, case when co.order_date = fv.first_visit then 1 else 0 end as first_visit_flag,
+case when co.order_date != fv.first_visit then 1 else 0 end as repeat_visit_flag
+from customer_orders co
+inner join fisrt_visit fv on fv.customer_id = co.customer_id 
+ 
+-- Complex SQL 3 | Scenario based Interviews Question for Product companies
+
+ create table entries ( 
+name varchar(20),
+address varchar(20),
+email varchar(20),
+floor int,
+resources varchar(10));
+
+insert into entries 
+values ('A','Bangalore','A@gmail.com',1,'CPU'),('A','Bangalore','A1@gmail.com',1,'CPU'),('A','Bangalore','A2@gmail.com',2,'DESKTOP')
+,('B','Bangalore','B@gmail.com',2,'DESKTOP'),('B','Bangalore','B1@gmail.com',2,'DESKTOP'),('B','Bangalore','B2@gmail.com',1,'MONITOR')
+
+
+-- find count of floor visit of the person
+
+WITH 
+distinct_resources AS (
+    SELECT DISTINCT name, resources  
+    FROM entries
+),
+agg_resources AS (
+    SELECT name, GROUP_CONCAT(DISTINCT resources) AS resources_used
+    FROM distinct_resources
+    GROUP BY name
+),
+total_visits AS (
+    SELECT name, 
+           COUNT(floor) AS total_visits 
+    FROM entries e 
+    GROUP BY name
+),
+floor_visits AS (
+    SELECT name, 
+           floor, 
+           COUNT(1) AS visit_count,
+           RANK() OVER(PARTITION BY name ORDER BY COUNT(1) DESC) rnk
+    FROM entries e 
+    GROUP BY name, floor
+)
+SELECT fv.name,
+       fv.floor AS most_visited_floor, 
+       tv.total_visits, 
+       ar.resources_used 
+FROM floor_visits fv
+INNER JOIN total_visits tv ON fv.name = tv.name
+INNER JOIN agg_resources ar ON tv.name = ar.name
+WHERE fv.rnk = 1;
+
+
+-- approch
+
+
+SELECT name, resources FROM entries
+name|resources|
+----+---------+
+A   |CPU      |
+A   |CPU      |
+A   |DESKTOP  |
+B   |DESKTOP  |
+B   |DESKTOP  |
+B   |MONITOR  |
+
+
+SELECT DISTINCT name, resources FROM entries
+name|resources|
+----+---------+
+A   |CPU      |
+A   |DESKTOP  |
+B   |DESKTOP  |
+B   |MONITOR  |
+
+
+select * from agg_resources
+name|resources_used |
+----+---------------+
+A   |CPU,DESKTOP    |
+B   |DESKTOP,MONITOR|
+
+
+total_visits
+name|total_visits|
+----+------------+
+A   |           3|
+B   |           3|
+
+floor_visits
+name|floor|visit_count|rnk|
+----+-----+-----------+---+
+A   |    1|          2|  1|
+A   |    2|          1|  2|
+B   |    2|          2|  1|
+B   |    1|          1|  2|
+
+
+---
+-- 6. WAQ to find PersonID,name,number of friends who have friends with total score > 100
+
+drop table friend 
+Create table friend (pid int, fid int)
+
+insert into friend (pid , fid ) values ('1','2'), ('1','3'), ('2','1'), ('2','3'), ('3','5'), ('4','2'), ('4','3'), ('4','5');
+
+insert into person(PersonID,Name ,Score) values ('1','Alice','88'), ('2','Bob','11'), ('3','Devis','27'), ('4','Tara','45'), ('5','John','63');
+drop table person
+create table person (PersonID int,	Name varchar(50),	Score int)
+
+select * from person
+select * from friend
+
+  
+select p.personid, p.name,  count(f.fid)  as number_of_friends, sum(pp.score) as friends_total_score
+  from person p 
+  right join friend f on f.pid = p.personid
+  left join person pp on pp.personid = f.fid
+  group by p.personid, p.name
+  having sum(pp.score) > 100
+
+-- expected 
+-- personid|name|number_of_friends|friends_total_score|
+-- --------+----+-----------------+-------------------+
+--        2|Bob |                2|                115|
+--        4|Tara|                3|                101|
+
+ -----
+ 
+ -- Q9. Market Analysis
+-- 
+-- WAQ to find for each seller , whether the branch of second Item (by date) they sold is thier favoraite brand or not?
+-- if seller sold less than 2 items, report the anser for that seller as no.
+-- 
+-- o/p
+-- seller_id 2nd_item_fav_branch
+-- 1			yes/no		
+-- 2			yes/no	
+
+create table users (
+user_id         int     ,
+ join_date       date    ,
+ favorite_brand  varchar(50));
+
+ create table orders (
+ order_id       int     ,
+ order_date     date    ,
+ item_id        int     ,
+ buyer_id       int     ,
+ seller_id      int 
+ );
+
+ create table items
+ (
+ item_id        int     ,
+ item_brand     varchar(50)
+ );
+
+
+ insert into users values (1,'2019-01-01','Lenovo'),(2,'2019-02-09','Samsung'),(3,'2019-01-19','LG'),(4,'2019-05-21','HP');
+
+ insert into items values (1,'Samsung'),(2,'Lenovo'),(3,'LG'),(4,'HP');
+
+ insert into orders values (1,'2019-08-01',4,1,2),(2,'2019-08-02',2,1,3),(3,'2019-08-03',3,2,3),(4,'2019-08-04',1,4,2)
+ ,(5,'2019-08-04',1,3,4),(6,'2019-08-05',2,2,4);
+
+
+answer
+step 1: get the second order details using order details for each seller.
+step 2: get the item brand using join with items table
+step 3: check brand from second order is sellers favoraite brand or not
+step 4: letf join with user as we want all sellers from users
+
+with rnk_orders as (
+select *,
+RANK() OVER (PARTITION BY seller_id  order by order_date ASC ) as rn
+from orders)
+select u.user_id, ro.seller_id, i.item_brand, u.favorite_brand as seller_fav_brand,
+case when i.item_brand = u.favorite_brand then "yes" else "no" end as 2nd_item_fav_branch
+from users u 
+left join rnk_orders ro on ro.seller_id=u.user_id and rn=2
+left join items i on ro.item_id=i.item_id; 
+-- where rn=2;
+
+-- ------------------------------------------------------------
+
+-- V20 Data Analyst Spotify Case Study
+
+CREATE table activity
+(
+user_id varchar(20),
+event_name varchar(20),
+event_date date,
+country varchar(20)
+);
+delete from activity;
+insert into activity values (1,'app-installed','2022-01-01','India')
+,(1,'app-purchase','2022-01-02','India')
+,(2,'app-installed','2022-01-01','USA')
+,(3,'app-installed','2022-01-01','USA')
+,(3,'app-purchase','2022-01-03','USA')
+,(4,'app-installed','2022-01-03','India')
+,(4,'app-purchase','2022-01-03','India')
+,(5,'app-installed','2022-01-03','SL')
+,(5,'app-purchase','2022-01-03','SL')
+,(6,'app-installed','2022-01-04','Pakistan')
+,(6,'app-purchase','2022-01-04','Pakistan');
+
+
+-- user_id|event_name   |event_date|country |
+-- -------+-------------+----------+--------+
+-- 1      |app-installed|2022-01-01|India   |
+-- 1      |app-purchase |2022-01-02|India   |
+-- 2      |app-installed|2022-01-01|USA     |
+-- 3      |app-installed|2022-01-01|USA     |
+-- 3      |app-purchase |2022-01-03|USA     |
+-- 4      |app-installed|2022-01-03|India   |
+-- 4      |app-purchase |2022-01-03|India   |
+-- 5      |app-installed|2022-01-03|SL      |
+-- 5      |app-purchase |2022-01-03|SL      |
+-- 6      |app-installed|2022-01-04|Pakistan|
+-- 6      |app-purchase |2022-01-04|Pakistan|
+
+-- Q1. find total active users each day
+
+-- event_date active_user
+-- 2022-01-01 3
+-- 2022-01-02 1
+-- 2022-01-03 3
+-- 2022-01-04 1
+
+select event_date, count(DISTINCT user_id) as active_user from activity a  
+group by event_date
+
+-- q2.  Find total active users each week
+-- 
+-- week_number active_users
+-- 1			3	
+-- 2			5
+
+
+select WEEK(event_date)+1 as week, count(DISTINCT user_id) from activity a 
+group by week
+
+-- q3. date wise total number of users who made the purchese on same day hey install the app.
+-- 
+-- event_date users
+-- 2022-01-01 0
+-- 2022-01-02 0
+-- 2022-01-03 2
+-- 2022-01-04 1
+
+
+-- step 1: 
+select event_date, user_id, count(DISTINCT event_name) as number_of_activities  
+from activity a
+group by event_date, user_id
+having number_of_activities = 2 # problem is we will not get those row having number_of_activities = 1  
+
+-- step 2: insted of having use case logic to solve the problem 
+select user_id, event_date,
+case	when count(DISTINCT event_name) = 2 
+		then user_id 
+ 		else 
+  			null 
+		end as new_user
+from activity a
+group by user_id, event_date
+-- having number_of_activities = 2
+
+-- step3: use sub query
+select event_date, count(new_user)
+from (
+select user_id, event_date,
+	  case when count(DISTINCT event_name) = 2 then user_id else null end as new_user
+from activity a
+group by user_id, event_date ) a
+group by event_date
+
+-- Q4.  percentage of paid user in india, USA and any other countries should be tagged as others
+-- country user_percentage
+-- INDIA   40
+-- USA		20
+-- Others	40
+
+
+with country_wise_users as 
+(select 
+case 
+	when country in ("USA","INDIA")
+	then country 
+	else "others" end as new_country,
+	count(DISTINCT user_id) as user_count 
+from activity a
+where event_name ="app-purchase"
+group by new_country),
+
+total as (select sum( user_count) as total from country_wise_users) 
+
+select new_country, 1.0* user_count/total*100 from country_wise_users,total;
+
+
+-- Q5: Among  all the users who installed the app on given day, how many did app puchese on very next day, day wise result
+
+WITH prev_data AS (
+    SELECT *,
+           LAG(event_name, 1) OVER (PARTITION BY user_id ORDER BY event_date) AS prev_e_name,
+           LAG(event_date, 1) OVER (PARTITION BY user_id ORDER BY event_date) AS prev_e_date
+    FROM activity a
+)
+-- SELECT *
+SELECT event_date, count(DISTINCT user_id)
+FROM prev_data
+WHERE event_name = 'app-purchase' 
+  AND prev_e_name = 'app-installed'
+  AND DATEDIFF(event_date, prev_e_date) = 1
+group by event_date ;
+
+-- ------------------------------------------------------------
+v30: LeetCode Hard SQL problem | Students Reports By Geography | Pivot Ka Baap
+
+create table players_location
+(
+name varchar(20),
+city varchar(20)
+);
+delete from players_location;
+insert into players_location
+values ('Sachin','Mumbai'),('Virat','Delhi') , ('Rahul','Bangalore'),('Rohit','Mumbai'),('Mayank','Bangalore');
+
+# notes: In SQL, when you use the MAX() function on a column that contains string values, it evaluates them based on their alphabetical order rather than their numeric value.
+SELECT MAX(num)
+FROM (SELECT "A" AS num FROM dual
+      UNION ALL
+      SELECT "B" AS num FROM dual) as s; 
+
+MAX(num)|
+--------+
+B       |
+
+
+select player_groups,
+max(case when city = 'Bangalore' then name end) as Bangalore,
+max(case when city = 'Delhi' then name end) as Delhi,
+max(case when city = 'Mumbai' then name end) as Mumbai
+from (
+
+select name, city,row_number() over (partition by city order by name asc) as player_groups
+from players_location) a
+
+group by player_groups
+order by player_groups;
+-- ----------------------------- -------------------------------
+
+v31: LeetCode Hard SQL Problem to find median salary of employees for each company. 
+
+
+median: 2 3 4 5 4 : 4 is median 
+								2 5 6 7 8 9 : (6+7)/2 --> 6.5 is median
+
+
+create table employee 
+(
+emp_id int,
+company varchar(10),
+salary int
+);
+
+insert into employee values (1,'A',2341), (2,'A',341), (3,'A',15), (4,'A',15314), (5,'A',451), (6,'A',513), (7,'B',15), (8,'B',13), (9,'B',1154), (10,'B',1345), (11,'B',1221), (12,'B',234), (13,'C',2345), (14,'C',2645), (15,'C',2645), (16,'C',2652), (17,'C',65);
+
+> select * from employee;
++--------+---------+--------+
+| emp_id | company | salary |
++--------+---------+--------+
+|      1 | A       |   2341 |
+|      2 | A       |    341 |
+|      3 | A       |     15 |
+|      4 | A       |  15314 |
+|      5 | A       |    451 |
+|      6 | A       |    513 |
+|      7 | B       |     15 |
+|      8 | B       |     13 |
+|      9 | B       |   1154 |
+|     10 | B       |   1345 |
+|     11 | B       |   1221 |
+|     12 | B       |    234 |
+|     13 | C       |   2345 |
+|     14 | C       |   2645 |
+|     15 | C       |   2645 |
+|     16 | C       |   2652 |
+|     17 | C       |     65 |
++--------+---------+--------+
+17 rows in set (0.00 sec)
+
+
+select *, total_count*1.0/2 as top , total_count*1.0/2 + 1 as bottom 								
+from (select *,
+	ROW_NUMBER() over(partition by company order by salary ) as rn,
+	count(1) over (PARTITION by company) as total_count
+from employee e) as a  
+where rn between top, bottom
+
+
+SELECT company, AVG(salary)  
+FROM (
+    SELECT *,
+           total_count * 1.0 / 2 AS top,
+           total_count * 1.0 / 2 + 1 AS bottom
+    FROM (
+        SELECT *,
+               ROW_NUMBER() OVER (PARTITION BY company ORDER BY salary) AS rn,
+               COUNT(1) OVER (PARTITION BY company) AS total_count
+        FROM employee e
+    ) AS a
+) AS b
+WHERE rn BETWEEN top AND bottom
+group by company;
+
+-- ------------------------------------------------------------
+v32 :   I Asked This SQL Question in an Amazon Interview | Most Asked SQL Problem with a Twist
+
+
+CREATE TABLE emp (
+ emp_id int NULL,
+ emp_name varchar(50) NULL,
+ salary int NULL,
+ manager_id int NULL,
+ emp_age int NULL,
+ dep_id int NULL,
+ dep_name varchar(20) NULL,
+ gender varchar(10) NULL
+) ;
+
+insert into emp values(1,'A  nkit',14300,4,39,100,'Analytics','Female'),(2,'Mohit',14000,5,48,200,'IT','Male'),(3,'Vikas',12100,4,37,100,'Analytics','Female'),(4,'Rohit',7260,2,16,100,'Analytics','Female'),(5,'Mudit',15000,6,55,200,'IT','Male'),(6,'Agam',15600,2,14,200,'IT','Male'),(7,'Sanjay',12000,2,13,200,'IT','Male'),(8,'Ashish',7200,2,12,200,'IT','Male'),(9,'Mukesh',7000,6,51,300,'HR','Male'),(10,'Rakesh',8000,6,50,300,'HR','Male'),(11,'Akhil',4000,1,31,500,'Ops','Male')
+
++--------+----------+--------+------------+---------+--------+-----------+--------+
+| emp_id | emp_name | salary | manager_id | emp_age | dep_id | dep_name  | gender |
++--------+----------+--------+------------+---------+--------+-----------+--------+
+|      1 | Ankit    |  14300 |          4 |      39 |    100 | Analytics | Female |
+|      2 | Mohit    |  14000 |          5 |      48 |    200 | IT        | Male   |
+|      3 | Vikas    |  12100 |          4 |      37 |    100 | Analytics | Female |
+|      4 | Rohit    |   7260 |          2 |      16 |    100 | Analytics | Female |
+|      5 | Mudit    |  15000 |          6 |      55 |    200 | IT        | Male   |
+|      6 | Agam     |  15600 |          2 |      14 |    200 | IT        | Male   |
+|      7 | Sanjay   |  12000 |          2 |      13 |    200 | IT        | Male   |
+|      8 | Ashish   |   7200 |          2 |      12 |    200 | IT        | Male   |
+|      9 | Mukesh   |   7000 |          6 |      51 |    300 | HR        | Male   |
+|     10 | Rakesh   |   8000 |          6 |      50 |    300 | HR        | Male   |
+|     11 | Akhil    |   4000 |          1 |      31 |    500 | Ops       | Male   |
++--------+----------+--------+------------+---------+--------+-----------+--------+
+
+with cte as (
+
+SELECT emp_id,
+       emp_name,
+       salary,
+       dep_id,
+       dep_name,
+       RANK() OVER (PARTITION BY dep_id ORDER BY salary DESC) AS rn,
+       COUNT(*) OVER (PARTITION BY dep_id) AS emp_count
+FROM emp e
+
+) 
+
+select * from cte 
+where rn = 3 
+or (emp_count < 3 and rn = emp_count) # this is a twist
+-- ------------------------------------------------------------
+v33: Human Traffic of Stadium
+
+display records wich have 3 or more consicative rows
+with the amont of peple more than 100(inclusive) each day
+create table stadium (
+id int,
+visit_date date,
+no_of_people int
+);
+
+insert into stadium
+values (1,'2017-07-01',10)
+,(2,'2017-07-02',109)
+,(3,'2017-07-03',150)
+,(4,'2017-07-04',99)
+,(5,'2017-07-05',145)
+,(6,'2017-07-06',1455)
+,(7,'2017-07-07',199)
+,(8,'2017-07-08',188);
+
+select * from stadium;
+id|visit_date|no_of_people|
+--+----------+------------+
+ 1|2017-07-01|          10|
+ 2|2017-07-02|         109|
+ 3|2017-07-03|         150|
+ 4|2017-07-04|          99|
+ 5|2017-07-05|         145|
+ 6|2017-07-06|        1455|
+ 7|2017-07-07|         199|
+ 8|2017-07-08|         188|
+
+with cte as (select *, 
+-- row_number() over (order by visit_date)
+id - row_number() over (order by visit_date) as grp  # trick strick | diff should be same for consicative rows
+from stadium 
+where no_of_people >= 100)
+
+select grp, count(*) as consicative_rows
+from cte
+group by grp having consicative_rows >=   3
+----
+
+
+ -- main query
+with cte as (select *, 
+-- row_number() over (order by visit_date)
+id - row_number() over (order by visit_date) as grp  # trick strick | diff should be same for consicative rows
+from stadium 
+where no_of_people >= 100)
+select * from cte  
+where grp in (
+select grp from cte group by grp having count(*) >=3
+)
+ 
+-- ------------------------------------------------------------
+ 
+v34 : Very Interesting SQL Interview Question Asked by Udaan | Power of Self Join | Data Analytics
+
++---------------+---------+
+| business_date | city_id |
++---------------+---------+
+| 2020-01-02    |       3 |
+| 2020-07-01    |       7 |
+| 2021-01-01    |       3 |
+| 2021-02-03    |      19 |
+| 2022-12-01    |       3 |
+| 2022-12-15    |       3 |
+| 2022-02-28    |      12 |
++---------------+---------+
+
+
+create table business_city (
+business_date date,
+city_id int
+);
+delete from business_city;
+insert into business_city
+values(cast('2020-01-02' as date),3),(cast('2020-07-01' as date),7),(cast('2021-01-01' as date),3),(cast('2021-02-03' as date),19)
+,(cast('2022-12-01' as date),3),(cast('2022-12-15' as date),3),(cast('2022-02-28' as date),12);
+
+
+with cte as (select year(business_date) as b_year ,city_id from business_city)
+
+select *
+-- count(case when right_table.city_id is null then business_city.city_id) as new_cities 
+from business_city c1
+left join cte c2 on c1.city_id = c2.city_id
+and year(c1.business_date) > c2.b_year 
+group by c1.year1
+
+--
+
+WITH cte AS (
+    SELECT YEAR(business_date) AS b_year, city_id 
+    FROM business_city
+)
+SELECT 
+    YEAR(c1.business_date) AS year1,
+    COUNT(CASE WHEN c2.city_id IS NULL THEN c1.city_id END) AS new_cities 
+FROM 
+    business_city c1
+LEFT JOIN 
+    cte c2 
+ON 
+    c1.city_id = c2.city_id
+    AND YEAR(c1.business_date) > c2.b_year
+GROUP BY 
+    YEAR(c1.business_date);
+
+-- ------------------------------------------------------------
+v35:PharmEasy SQL  Question | Consecutive Seats in a Movie Theatre | Data Analytics
+
+Q: sql to find consicative empty seats (4 seats in same row)
+
+create table movie(
+seat varchar(50),occupancy int
+);
+insert into movie values('a1',1),('a2',1),('a3',0),('a4',0),('a5',0),('a6',0),('a7',1),('a8',1),('a9',0),('a10',0),
+('b1',0),('b2',0),('b3',0),('b4',1),('b5',1),('b6',1),('b7',1),('b8',0),('b9',0),('b10',0),
+('c1',0),('c2',1),('c3',0),('c4',1),('c5',1),('c6',0),('c7',1),('c8',0),('c9',0),('c10',1);
+
+
+select * from movie;
+
+seat|occupancy|
+----+---------+
+a1  |        1|
+a2  |        1|
+a3  |        0|
+a4  |        0|
+a5  |        0|
+a6  |        0|
+a7  |        1|
+a8  |        1|
+a9  |        0|
+a10 |        0|
+b1  |        0|
+b2  |        0|
+b3  |        0|
+b4  |        1|
+b5  |        1|
+b6  |        1|
+b7  |        1|
+b8  |        0|
+b9  |        0|
+b10 |        0|
+c1  |        0|
+c2  |        1|
+c3  |        0|
+c4  |        1|
+c5  |        1|
+c6  |        0|
+c7  |        1|
+c8  |        0|
+c9  |        0|
+c10 |        1|
+
+0/p
+seat|occupancy|
+----+---------+
+a3  |        0|
+a4  |        0|
+a5  |        0|
+a6  |        0|
+note: SELECT substring("prashant",5,4);   from 5th char give me 4 charecter.
+
+WITH cte1 AS (
+    SELECT *,
+           LEFT(seat, 1) AS row_id,
+           CAST(SUBSTRING(seat, 2) AS UNSIGNED) AS seat_id
+    FROM movie
+)  ,
+ cte2 AS (
+    SELECT *,
+           Max(occupancy) OVER (PARTITION BY row_id ORDER BY seat_id ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) AS is_4_empty,
+           COUNT(occupancy) OVER (PARTITION BY row_id ORDER BY seat_id ROWS BETWEEN CURRENT ROW AND 3 FOLLOWING) AS empty_seats_count
+    FROM cte1
+) ,
+ cte3 AS (
+    SELECT * 
+    FROM cte2 
+    WHERE is_4_empty = 0 AND empty_seats_count = 4
+)
+
+SELECT cte2.seat, cte2.occupancy
+FROM cte2
+INNER JOIN cte3 
+    ON cte2.row_id = cte3.row_id
+    AND cte2.seat_id BETWEEN cte3.seat_id AND cte3.seat_id + 3;
+
+   
+Explanation:
+cte1: Extracts the row and seat number from the seat column.
+cte2: Determines if there are four consecutive empty seats using the MIN(occupancy) and counts the seats.
+cte3: Filters to find only the seats that start a block of four consecutive empty seats.
+Final SELECT: Joins cte2 with cte3 on the row_id and ensures that the seat_id in cte2 is within the range of four consecutive seats identified in cte3.
+This query will return all the rows in cte2 that belong to the four consecutive empty seats identified in cte3.
+ 
+---
+v40: we will discuss a very interesting problem where from a phone log history 
+we need to find if the caller had done first and last call for the day to the same person.
+
+create table phonelog(
+    Callerid int, 
+    Recipientid int,
+    Datecalled datetime
+);
+
+
+insert into phonelog(Callerid, Recipientid, Datecalled)
+values(1, 2, '2019-01-01 09:00:00.000'),
+       (1, 3, '2019-01-01 17:00:00.000'),
+       (1, 4, '2019-01-01 23:00:00.000'),
+       (2, 5, '2019-07-05 09:00:00.000'),
+       (2, 3, '2019-07-05 17:00:00.000'),
+       (2, 3, '2019-07-05 17:20:00.000'),
+       (2, 5, '2019-07-05 23:00:00.000'),
+       (2, 3, '2019-08-01 09:00:00.000'),
+       (2, 3, '2019-08-01 17:00:00.000'),
+       (2, 5, '2019-08-01 19:30:00.000'),
+       (2, 4, '2019-08-02 09:00:00.000'),
+       (2, 5, '2019-08-02 10:00:00.000'),
+       (2, 5, '2019-08-02 10:45:00.000'),
+       (2, 4, '2019-08-02 11:00:00.000');
+      
+
+      
+      
+insert into phonelog(Callerid, Recipientid, Datecalled) values(2, 6, '2019-01-01 09:00:00.000');
+
+
+select * from   phonelog;
+
+with calls as (select callerid, cast(Datecalled as date) as called_date, min(Datecalled) as first_call ,max(Datecalled) as last_call
+from phonelog
+group by callerid,called_date)
+ 
+select *, p1.Recipientid from calls c
+inner join phonelog p1 on  c.callerid = p1.callerid and c.first_call = p1.Datecalled
+inner join phonelog p2 on  c.callerid = p2.callerid and c.last_call = p2.Datecalled
+where p1.Recipientid = p2.Recipientid;
+
+
+
+-- check this approch: 
+with cte as (
+select *, min(Datecalled) over(partition by date(Datecalled)) as first_call, max(Datecalled) over(partition by date(Datecalled)) as last_call from phonelog),
+cte1 as(
+select *, lag(Recipientid) over() as lags from cte where Datecalled=first_call or Datecalled=last_call)
+select Callerid, Recipientid, Datecalled, first_call, last_call from cte1 where Recipientid=lags;
+
+-- check this approch: 
+with A as (
+select *,
+date(datecalled) as called_date,
+row_number() over (partition by Callerid,date(datecalled) order by datecalled asc) as firstcall,
+row_number() over (partition by Callerid,date(datecalled) order by datecalled desc) as  lastcall
+from phonelog
+)
+
+select callerid,called_date,Recipientid 
+from A 
+where firstcall=1 or lastcall=1
+group by callerid,called_date,Recipientid 
+having count(1)>1
+
+------
+
+v47: Amazon for a Business Intelligence Engineer Position.
+
+# user who purchese diffent products on differnt dates 
+create table purchase_history
+(userid int
+,productid int
+,purchasedate date
+);
+
+insert into purchase_history values
+(1,1,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(1,2,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(1,3,STR_TO_DATE('25/01/2012', '%d/%m/%Y'))
+,(2,1,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(2,2,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(2,2,STR_TO_DATE('25/01/2012', '%d/%m/%Y'))
+,(2,4,STR_TO_DATE('25/01/2012', '%d/%m/%Y'))
+,(3,4,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(3,1,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(4,1,STR_TO_DATE('23/01/2012', '%d/%m/%Y'))
+,(4,2,STR_TO_DATE('25/01/2012', '%d/%m/%Y'));
+
+select * from purchase_history;
+
+truncate table  purchase_history;
+
+select userid, count(purchasedate) as no_of_dates,count(DISTINCT purchasedate) as dis_dates, count(productid) as products,count(DISTINCT productid) as dist_products
+from purchase_history
+group by userid
+having dis_dates > 1 # This filters out users who have only made purchases on a single date.
+and dist_products >=  dis_dates and products = dist_products # user is buying at least one unique product on each distinct purchase date.
+
+userid|no_of_dates|dis_dates|products|dist_products|
+------+-----------+---------+--------+-------------+
+     1|          3|        2|       3|            3|
+     4|          2|        2|       2|            2|
+----
+
+v51: 
+q1. 
+	logic 
+		step 1: segament wise user
+		step 2: join with booking to get booking data
+		step 3: count of users who book flight(condition1) in given date range (condition2)
+		step 4: 1 user has multiple booking for that day , so use distinct.
+	q2.
+	 logic user's booking  order by date, who have rank 1 and type is hotel.
+
+		or don't forget we have first_value function also
+ 
+q3   
+
+select user daydiff (days,fisrt_booking , last booking )
+from bookings
+group by USER 
+order by booking_date
+	 
+
+
+logic 1 
+firstvalue(date) over(partition by user_id order by booking date) as f
+lastvalue(date) over(partition by user_id order by booking date) as l
+
+logic 2:  min max functions if dont want to use rank
+
+
+q4
+
+logic:
+ 
+
+sum of line_of_business when flight,count of line_of_business when hotel
+
+group by user_id or segment, whicherver as problem STATEMENT   
+
+join needed as we need segment data and get line_of_business and segment 
+ 
+------------------------------------------------------------------------
+
+v56:
+
+create table job_positions (id  int,
+title varchar(100),
+ groupss varchar(10),
+ levels varchar(10),     
+  payscale int, 
+  totalpost int );
+
+insert into job_positions values (1, 'General manager', 'A', 'l-15', 10000, 1); 
+insert into job_positions values (2, 'Manager', 'B', 'l-14', 9000, 5); 
+insert into job_positions values (3, 'Asst. Manager', 'C', 'l-13', 8000, 10);  
+
+  create table job_employees ( id  int, 
+    name   varchar(100),     
+     position_id  int 
+   ) 
+insert into job_employees values (1, 'John Smith', 1) 
+, (2, 'Jane Doe', 2)
+, (3, 'Michael Brown', 2)
+, (4, 'Emily Johnson', 2) 
+, (5, 'William Lee', 3) 
+, (6, 'Jessica Clark', 3) 
+, (7, 'Christopher Harris', 3)
+, (8, 'Olivia Wilson', 3)
+, (9, 'Daniel Martinez', 3)
+, (10, 'Sophia Miller', 3)
+
+
+select * from job_positions;
+select * from job_employees;
+
+# using aam jindagi and recursive cte
+
+with recursive cte as (
+    select id, title, groupss, levels, payscale, totalpost, 1 as rn 
+    from job_positions
+    union all
+    select jp.id, jp.title, jp.groupss, jp.levels, jp.payscale, jp.totalpost, cte.rn + 1 
+    from cte
+    join job_positions jp on cte.title = jp.title and cte.rn + 1 <= jp.totalpost
+),
+emp as (
+select *,ROW_NUMBER() over(PARTITION by POSITION_id) as rn from job_employees
+)
+select cte.*, COALESCE (emp.name,"open") as name  
+from cte 
+left join emp on cte.id = emp.position_id and cte.rn = emp.rn
+order by cte.id,cte.rn
+
+#mentos jindagi
+
+dynamic generate the table 
+then SUBSTRING(customer_name, 1st_space_position + 1, LENGTH(customer_name) - 1st_space_position)
+------------------------------------------------------------------------
+v61 : First Name , Middle Name and Last Name of a Customer | Famous SQL Interview Question
+
+create table customers  (customer_name varchar(30))
+insert into customers values ('Ankit Bansal')
+,('Vishal Pratap Singh')
+,('Michael');
+
+
+	WITH cte AS (
+    SELECT 
+        customer_name, 
+        LENGTH(customer_name) - LENGTH(REPLACE(customer_name, ' ', '')) AS spaces_count, 
+        LOCATE(' ', customer_name) AS 1st_space_position,
+        LOCATE(' ', customer_name, LOCATE(' ', customer_name) + 1) AS 2nd_space_position
+    FROM 
+        customers
+)
+
+SELECT 
+    customer_name,
+    spaces_count,
+    1st_space_position,
+    2nd_space_position,
+    
+    CASE 
+        WHEN spaces_count = 0 THEN customer_name
+        ELSE SUBSTRING(customer_name, 1, 1st_space_position - 1) 
+    END AS f_name,
+    CASE 
+        WHEN spaces_count <= 1 THEN NULL
+        ELSE SUBSTRING(customer_name, 1st_space_position + 1, 2nd_space_position-1 - 1st_space_position) 
+    END AS m_name,
+   
+    CASE
+    			WHEN spaces_count =0 then null
+    			WHEN spaces_count =1 then SUBSTRING(customer_name, 1st_space_position + 1, LENGTH(customer_name) - 1st_space_position)
+    			WHEN spaces_count =2 then SUBSTRING(customer_name, 2nd_space_position + 1, LENGTH(customer_name) - 2nd_space_position)
+    			end as l_name
+    
+FROM 
+    cte;
+   
+   
+notes: SUBSTRING(string, start_position, length)
+string: The original string from which you want to extract a substring.
+start_position: The position within the string where the substring begins.
+Positions are 1-based, meaning the first character in the string is at position 1.
+If start_position is negative, the function counts from the end of the string.
+length (optional): The number of characters to return.
+If omitted, the substring will run from the start_position to the end of the string.
+   
+------------------------------------------------------------------------
+
+
+	
+
+
+
+
+
+
+
+

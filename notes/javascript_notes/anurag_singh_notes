@@ -1,0 +1,81 @@
+# History of js
+# is js interpreted or compiled : 
+interpreted: line by line execution
+compiled: whole file at once . fast. but we can not stop in middle of any two lines
+------
+# datatypes
+let, const - New in ES6 ;  var - Old
+
+var : 
+var has scope outside {}  -i.e. available throughout the function in which they're declared ( function scoped )
+we can redeclared
+
+let, const: 
+only available inside the block where they're defined (block scope).
+can not redeclared
+------
+#  truthy and falsy values (V12)
+
+Boolean(NaN), Boolean(''), Boolean(undefined),Boolean(null) : are falsy values
+
+#camparision operator
+ == (it does implicitly type conversion)
+ === (strict eqality)
+------
+# object.sael # cannot be added, removed but can modified 
+# object.freeze # cannot be added, removed, or modified
+let obj = { value: 10};
+Object.seal(obj);
+obj.value = 20;
+console.log(obj.value); # 20
+Object.freeze(obj);
+obj.value = 30;
+console.log(obj.value); # 20
+
+----
+
+# array methods
+
+# copy object 
+sprade operator ...
+
+
+# method vs function
+
+method: if we keep function inside an object
+----
+
+ES 6 feature
+https://medium.com/@shital.pimpale5/interview-questions-and-answers-on-es6-d17160e092d3
+
+-----
+
+Browser Object Model
+
+Key Components of the BOM: (BOM)
+window object:
+The global object in browser-based JavaScript, providing access to other BOM objects and properties like innerWidth, innerHeight, setTimeout, alert, open, and more. 
+navigator object:
+Provides information about the browser, including its user agent, platform, and other capabilities. 
+location object:
+Exposes information about the current URL and allows for navigation to new URLs. 
+history object:
+Provides methods for interacting with the browser's navigation history, like going back, forward, or to a specific page. 
+screen object:
+Provides information about the user's screen, such as its width, height, and color depth. 
+
+----
+The innerText property returns the text, without spacing and the textContent property returns the text along with spacing.
+---
+event loop
+---
+spread vs Rest operator
+---
+---
+Operator preciddance: BODMAS RULE
+
+
+
+
+
+

@@ -1,0 +1,11 @@
+General Principles
+KISS (Keep It Simple, Stupid) – Avoid unnecessary complexity.
+DRY (Don’t Repeat Yourself) – Reduce code duplication by using functions, modules, or inheritance.
+----
+Object-Oriented Principles (SOLID)
+S – Single Responsibility Principle (SRP) – Each class should have only one reason to change.
+O – Open/Closed Principle (OCP) – Code should be open for extension but closed for modification.
+L – Liskov Substitution Principle (LSP) – Subclasses should be substitutable for their base classes.
+I – Interface Segregation Principle (ISP) – Avoid forcing classes to implement unnecessary methods.
+D – Dependency Inversion Principle (DIP) – Depend on abstractions, not concrete implementations.
+---

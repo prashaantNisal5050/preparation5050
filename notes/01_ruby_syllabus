@@ -1,0 +1,111 @@
+
+Key notes on Ruby
+
+# OPPS : write in ruby
+  1 classes
+  2 objects
+  3 Encapsulation: attr_accessor
+  4 polimorphism : overloading , overriding
+  5 inheritance : method overloading
+     check behaviour of 
+      constants : undestand lexical scope
+      super keyword (4 syntaxes)
+      instance methods and variables
+      class methods and variables
+  6 abstraction
+
+  Q. how may ways to call any method
+  Q. how may ways to create the objects
+  Q. dup vs clone : dup will raise FrozenError when called on a frozen object. but this is not happening
+  Q. singleton pattern
+  Q. how attr_accessor is a example of meta programming?
+  Q. self in a variety of every-day situations.
+  Q. Is everything an object in ruby? true or false
+  q. call by reference vs call by value
+
+# Method visibility : public, private, protected.
+  Q. We can bypass the private restriction using send() .Then what is the use of private method?
+
+# Module as Mixins
+  Q.module vs class
+  Q.perpose of module
+  Q.include vs extends vs prepend
+  Q.lookup: class method, instance method, constant
+
+# CLOSURES OR BLOCK VS LAMBDA VS PROC
+  Q. explain :  ->(a) {p a}["Hello world"]
+
+# operator precedence:
+
+# Ruby Object Model
+  Object, Class, and Module hierarchy
+  Eigenclasses and singleton classes
+
+# Enumerables and Iterators
+  Using each, map, select, inject, etc.
+  Custom enumerators
+
+  Q. what happend when you call .first method?
+
+  # Data Types: Numbers, Strings, Symbols, Arrays, Hashes
+  methods for sorting modifing the elements
+  
+# Data Structures
+  Arrays
+    Operations: insert, delete, search, slice
+    Sorting and merging
+  Hashes
+    Accessing, modifying, and iterating over key-value pairs
+    Default values
+  Strings
+    Manipulation and encoding
+    Regular Expressions
+  Sets and Ranges
+    Operations on ranges and set operations
+
+# Multithreading
+  Global interpreter lock
+  Threads: drawback: race conditions
+  Fiber: 
+
+# Problem-Solving with Ruby
+    Algorithms and Data Structures
+    Arrays, Hashes, Strings manipulation
+    Sorting and Searching
+    Recursion and Iteration
+    Practice solving problems on platforms like:
+    LeetCode
+    HackerRank
+    Codewars
+
+# list of most common differences asked:
+    splash vs double splash operator
+    dup vs clone
+    Proc vs Lambda
+    Class vs Module
+    include vs extend
+    puts vs print vs p
+    Instance Variables vs Class Variables
+    Mutable vs Immutable Objects
+    == vs eql? vs equal?
+    require vs load vs autoload
+    Blocks vs Procs vs Lambdas
+    Hash vs Array
+    Single Quotes vs Double Quotes
+    Singleton Methods vs Class Methods
+    attr_accessor vs attr_reader vs attr_writer
+    super vs super()
+    Shallow Copy vs Deep Copy
+    Exception Handling: raise vs fail
+    Symbols vs Strings
+    case vs if
+    Inheritance vs Mixins
+    public vs private vs protected Methods
+    map vs each
+    to_s vs inspect
+    Thread vs Fiber
+    has_many vs belongs_to
+
+
+
+ruby idioms

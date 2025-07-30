@@ -1,0 +1,18 @@
+# props vs state
+
+1.1 Props
+Definition: Props, short for properties, are a way of passing data from parent to child components. They are read-only and help components receive values from their parents.
+
+Immutability of props: In React, props are immutable, meaning once they are set by the parent component, they cannot be changed or modified by the child component. This immutable nature ensures predictable behavior of components.
+
+1.2 State
+Definition: State is a built-in object in a React component where you can store property values that belong to that component. It is primarily used to store the local state of a component.
+
+Mutability of state: Unlike props, state is mutable. This means that it can be changed, and when it does change, the component re-renders to reflect those changes.
+
+When and why to use state: State is used when a component has data that may change over time and should cause a re-render when it does. For example, if you're building a counter application, the counter's value would be stored in the state, and it would change each time the user clicks a button.
+
+---
+
+
+

@@ -1,0 +1,73 @@
+1. A `Product` has many `Reviews`.
+
+2. A `Review` belongs to a `User` and to a `Product`.
+
+3. Each `Review` must have:
+
+   - A `rating` (integer between 1 and 5)
+
+   - A `comment` (text)
+
+   - `timestamps` for creation and update
+
+4. Each `User` can write multiple `Reviews`, but only one `Review` per `Product`.
+
+Find users who have reviewed a specific product
+
+splash operator
+solar
+Token-Based Auth Alternatives to JWT
+define
+map(&:to_i)
+The & in front of the symbol (&:to_i) tells Ruby:
+“Hey, convert this symbol into a block using .to_proc.”
+class library in ruby
+List Ruby idioms
+
+
+
+class User
+   has_many: :Reviews 
+end
+ 
+class Product
+   has_many: :Review
+end
+
+class Reviews 
+  belongs_to :user
+  belongs_to :product 
+  validates :rating, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }
+  validates :comment, presence: true
+  validates :product_id, uniqueness: { scope: :user_id }
+end
+  
+-----
+
+
+
+reviews.where(product: "some").users
+
+Find users who have reviewed a specific product
+
+User.reviews.where(product: "some_specific_product")
+
+User.all.reviews.product_id = 1
+
+
+1 : 
+
+
+
+Find users who have reviewed a specific product
+
+select * 
+from user
+join review On review.user_id 
+
+
+
+
+
+
+

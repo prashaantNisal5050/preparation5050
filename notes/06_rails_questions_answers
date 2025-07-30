@@ -1,0 +1,788 @@
+Read transaction management
+------------rails checklist-----------
+  The Rails philosophy includes two major guiding principles
+    1.Don't Repeat Yourself
+    2.Convention Over Configuration(onserve the naming convention)
+
+  Rails directory structure
+  ASSOCIATION (check in your project)
+      Why associations
+              Connection between two model,
+              it makes common operations simpler and easier,
+              how->consider 
+              author has many books. 
+              deleting an author, and ensuring that all of it books get deleted as well
+              just by writing has_many :books, dependent: :destroy in author model
+      
+      Types -  Rails supports 8 types of associations:
+          1.belongs_to
+          2.has_one
+          3.has_one :through
+          4.has_many
+          5.has_many :through apply (callbacks on 3rd model)   
+          6.has_and_belongs_to_many (no 3rd model) 
+        Advanced Associations
+          7.Polymorphic Associations
+          8.self join
+          9.STI
+                  desc: Sometimes, you may want to share fields and behavior between different models. Let's say we have Car, Motorcycle, and Bicycle models. We will want to share the color and price fields and some methods for all of them, but having some specific behavior for each, and separated controllers too.
+
+                  migration:rails generate model vehicle type:string color:string price:decimal{10.2}
+
+                  rails generate model car --parent=Vehicle (3 models and 1 table)
+                  class Car < Vehicle end
+                  
+                  STI won't work without a "type" field in the table
+
+
+      > When Should I Use Them? Has_many :Through (3 model,3 table) Vs HABTM (2 model, 3 table)
+            perpose : many-to-many association
+
+            example 
+              Person can subscribe to many magazines. Magazines can have many subscribers.
+              we can have a subscription model in the middle, which gives us a similar table to the earlier example, but with additional properties.
+              Subscriptions Table
+              person_id | magazine_id | subscription_type | subscription_length | subscription_date 
+
+              http://joshfrankel.me/blog/create-a-many-to-many-activerecord-association-in-ruby-on-rails/     
+
+      > Polymorphic Associations  
+          class Picture < ApplicationRecord
+            belongs_to :imageable, polymorphic: true
+          end
+
+          imageable_id , imageable_type
+
+          class Employee < ApplicationRecord
+            has_many :pictures, as: :imageable
+          end
+
+          class Product < ApplicationRecord
+            has_many :pictures, as: :imageable
+          end
+      > self-join : A self-join is a regular join, but the table is joined with itself.
+        class Employee < ApplicationRecord
+          # an employee can have many subordinates.
+          has_many :subordinates, class_name: "Employee", foreign_key: "manager_id"
+
+          # an employee can have one manager.
+          belongs_to :manager, class_name: "Employee", optional: true
+        end
+
+      > STI
+      Single Table Inheritance (STI) is a pattern in Rails that allows multiple models to be stored in a single database table.
+
+      bin/rails generate model car --parent=Vehicle
+
+      class Car < Vehicle
+      end
+      This means that all behavior added to Vehicle is available for Car too,
+
+
+
+
+
+      methods
+      has_one (the has_one relationship says that one of something is yours)
+      belongs_to vs has_one
+
+
+      one to one
+      one to many 
+      many to many 
+
+  # MIGRATION: Migrations are a convenient way to alter your database schema over time
+
+      > How does Rails know that migrations are pending?
+
+          There is a table in your application's database called schema_migrations, that has a single column called versions. There will be a row for every migration that has been run. If there is a migration file on disc, whose timestamp is not included in the schema_migrations table, then Rails knows that migrations need to be run.
+
+      Teams of developers − If one person makes a schema change, the other developers just need to update, by running "rake migrate".
+
+      Production servers − to bring the database up to date when you roll out a new release on production server.
+
+      Multiple machines − If you develop on both a desktop and a laptop, or in more than one location, migrations can help you keep them all synchronized.
+
+      commands
+          add_column
+          add_index
+          change_column
+          change_table
+          create_table
+          drop_table
+          remove_column
+          remove_index
+          rename_column
+      
+      how to run migrations in different environment (rake db:migrate:up RAILS_ENV=test)
+      filename and migration code syntax (i.e 20180808140304_usr_business_units.rb)
+      methods :  change vs "up & down"
+      what I need to do if I don't want created_at or updated_at? (remove t.timestamps)
+      and write manually.
+
+      eg.
+      class CreateNotifications < ActiveRecord::Migration[5.2]
+        def change
+          create_table :notifications do |t|
+            t.references :user
+            t.text       :message
+            t.string     :target_url
+            t.integer    :notification_type, :notification_type, default: 0
+            t.datetime   :created_at (or t.timestamp)
+          end
+        end
+      end
+
+    how to change the convention of naming a table?
+    model --> self
+
+  # ROUTING:Connecting URLs to Code
+      what is REST? https://www.phpflow.com/php/web-service-types-soapxml-rpcrestful/
+      (REpresentational State Transfer, or REST, is a pattern described by Roy Fielding in 2000)
+      
+      REST (Representational State Transfer) describes the general rules for how the data and services are represented through the API so that other programs will be able to correctly request and receive the data and services that an API makes available.
+          
+      resourcefull routing: Instead of declaring separate routes for your index, show, new, edit, create, update and destroy actions, a resourceful route declares them in a single line of code.
+
+      non-resourcefull routing: In addition to resource routing, Rails has powerful support for routing arbitrary URLs to actions. Here, you don't get groups of routes automatically generated by resourceful routing. Instead, you set up each route separately within your application
+
+      Multiple Resources (resources :articles)
+          CRUD, Verbs, and Actions table
+              articles      GET    /articles          {action:"index",   controller:"articles"}
+                            POST   /articles          {action:"create",  controller:"articles"}
+              new_article   GET    /articles/new      {action:"new",     controller:"articles"}
+              edit_article  GET    /articles/:id/edit {action:"edit",    controller:"articles"}
+              article       GET    /articles/:id      {action:"show",    controller:"articles"}
+                            PUT    /articles/:id      {action:"update",  controller:"articles"}
+                            DELETE /articles/:id      {action:"destroy", controller:"articles"}
+
+      Singular Resources (resource :article)
+                            POST        /article                articles#create
+                            GET         /article/new            articles#new
+                            GET         /article/edit           articles#edit
+                            GET         /article                articles#show
+                            PATCH/PUT   /article                articles#update
+                            DELETE      /article                articles#destroy
+
+      Nested Resources
+        Custom Member Actions
+            resources :articles do
+              member do
+                put 'publish'
+              end
+            end
+
+            publish_article PUT  /articles/:id/publish(.:format) {action:"publish", controller:"articles"}
+
+        Custom collection Actions
+          
+          resources :articles do
+            collection do
+              put 'publish_all'
+            end
+          end
+
+      publish_all_articles PUT    /articles/publish_all(.:format) {action:"publish_all", controller:"articles"}
+
+      Controller Namespaces and Routing
+          You may wish to organize groups of controllers under a namespace. Most commonly, you might group a number of administrative controllers under an Admin:: namespace. You would place these controllers under the app/controllers/admin directory, and you can group them together in your router:
+              namespace :admin do
+              resources :articles, :comments
+              end
+
+          i.e GET /admin/articles admin/articles#index    admin_articles_path
+
+      Non-RESTful Routes using match (bad practice but still you should know)
+
+  ACTIVE RECORD QUERY INTERFACE
+
+  WHAT IS ACTIVE RECORD:
+  1.ts main aim is to make sure that the relation among the object and the database is maintained and all the validations can be considered on time.
+  2.(ORM) layer supplied with Rails.
+      tables map to classes,
+      columns map to object attributes and
+      rows map to objects.
+  advantages:
+      1.mapping between the logical business model and the physical storage model.
+      2.allowing developers to focus on the business logic of the application rather than repetitive CRUD logic.
+
+      BASIC QUERIES
+
+      links: https://rubyplus.com/articles/3751-ActiveRecord-Query-Interface-in-Rails-5
+
+          find(10) vs find_by(:id => 10) what will be the output if this id is missing in db?
+          find(10) - ActiveRecord::RecordNotFound exception
+          find_by!(:id => 10) - ActiveRecord::RecordNotFound exception (The bang version of find_by method will throw ActiveRecord::RecordNotFound exception when the record is not found.)           
+          find_by(:id => 10) -nil
+          
+          User.find([1028,1029]) where 1028 is present in db :ActiveRecord::RecordNotFound exception
+          take : take 5 records
+          take!:ActiveRecord::RecordNotFound
+
+          Find_by vs where
+          Find_by:  Adds LIMIT 1 to the query or The first matching record (or nil if not found)
+          where: No limit unless you add .limit(...)
+          If we use where to search for client, we get ActiveRecord::Relation as the result, whereas the find_by returns the client.
+
+          problem with exists:
+              User.exists?(:name => "kasper") : query on DB,returns boolean
+              User.where?(:name => "kasper") : query on DB,returns array
+              User.present?
+              --------------------
+                  User.where("id > 1")
+                  User Load (0.7ms)  SELECT  `users`.* FROM `users` WHERE (id > 1) LIMIT 11
+
+                  User.exists?("id > 1") :false  ,it should be true 
+                  User Exists (0.6ms)  SELECT  1 AS one FROM `users` WHERE `users`.`id` = 0 LIMIT 1
+              --------------------
+
+      JOIN: allow to use related table into your query (inner join)
+
+          Joining a Single Association i.e Category.joins(:articles) #return a Category object for all categories with articles
+
+          SELECT `categories`.* FROM `categories` INNER JOIN `articles` ON `articles`.`category_id` = `categories`.`id`
+          ---------------------------------------------------------------
+          Joining a multiple Association i.e Article.joins(:category, :comments) #return all articles that have a category and at least one comment
+          
+          Joining a nested Association(sigle level) i.e Article.joins(comments: :guest) #return all articles that have a comment made by a guest
+          
+          SELECT `articles`.* FROM `articles` INNER JOIN `categories` ON `categories`.`id` = `articles`.`category_id` INNER JOIN `comments` ON `comments`.`article_id` = `articles`.`id`
+          ---------------------------------------------------------------
+
+          Joining a nested Association(multiple level) i.e Category.joins(articles: [{ comments: :guest }, :tags]) return all categories that have articles, where those articles have a comment made by a guest, and where those articles also have a tag.
+          
+          if you want to select a set of records whether or not they have associated records you can use the left_outer_joins method.
+          Author.left_outer_joins(:posts).distinct.select('authors.*, COUNT(posts.*) AS posts_count').group('authors.id')
+          
+          read:
+          https://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html
+
+      PRELOAD:
+          we can’t use posts table in where condition.
+          User.preload(:posts).where("posts.desc='ruby is awesome'") #error
+
+      INCLUDES:
+          However it is smarter than preload.
+          uses LEFT OUTER JOIN to get the data.
+          User.includes(:posts).where("posts.desc='ruby is awesome'") #success
+
+      EAGER LOADING
+       Eager loading lets you preload the associated data (authors) for all the posts from the database, improves the overall performance by reducing the number of queries, and provides you with the data that you want to display in your views
+
+          N + 1 problem (solution - 1.include 2.pluck method)
+              eg1.(10 queries for addresses + 1 query for all clients)
+                  clients = Client.limit(10)
+                  clients.each do |client|
+                    puts client.address.postcode
+                  end
+              
+              eg2.(2 queries only)
+                      
+                  clients = Client.includes(:address).limit(10)
+                   
+                  clients.each do |client|
+                    puts client.address.postcode
+                  end
+
+              eg3.Specifying hash Conditions on Eager Loaded Associations
+                  Article.includes(:comments).where(comments: { visible: true })
+                      or
+                  where clause on include
+                  Product.includes(:business_areas).where("business_areas.id" => [1,3])
+
+                  sql :SELECT "articles"."id" AS t0_r0, ... "comments"."updated_at" AS t1_r5 FROM "articles" LEFT OUTER JOIN "comments" ON "comments"."article_id" = "articles"."id" WHERE (comments.visible = 1)
+              
+              eg4.Specifying string Conditions on Eager Loaded Associations.(note: if where condition is in string use references)
+                  Article.includes(:comments).where("comments.visible = true").references(:comments)
+
+          It generate same sql query as above.
+      
+  SCOPES (returns relations object always) : I personally tend to use scopes when the logic is very small, for simple where/order clauses But I use class methods when it involves a bit more complexity.Internally Active Record converts a scope into a class method.The difference is that a scope will always return a relation, whereas our simple class method implementation will not.
+      syntax:
+
+      default_scope {where(:active => true)}
+      scope:inactive ,lambda {where(:active => false)} OR scope:inactive ,-> {where(:active => false)} //last one is staby lambda syntax
+      scope:addresswise ,lambda {|query| where(["address LIKE ?","%#{query}%"])}
+      
+      what if you don't want default scope :  User.unscoped.all
+
+      scope is a class method? how is it diifer from class method?
+      The difference is that a scope will always return a relation, whereas our simple class method implementation will not.
+
+      class Post < ActiveRecord::Base
+        def self.by_status(status)
+          where(status: status) if status.present?
+        end
+      end
+
+      Post.by_status('').recent
+      NoMethodError: undefined method `recent' for nil:NilClass
+
+      read http://blog.plataformatec.com.br/2013/02/active-record-scopes-vs-class-methods/
+
+      Why should I use a scope if it is a class method?
+          The difference is that a scope will always return a relation, whereas our simple class method implementation will not.
+          eg.Post.by_status('').recent :undefined method `recent' for nil:NilClass
+
+  CALLBACKS
+      https://kanjariyahardik.wordpress.com/2016/12/07/ruby-on-rails-observers-vs-callbacks/
+      Rails Callback
+        -Active Record provides hooks so that it is possible to write code that will run whenever an Active Record object object’s lifecycle state is changed.
+        -Allow you to trigger logic before or after an alteration of an object's state in model.
+
+      Rails Observer
+        -Does not depend on an object’s lifecycle, lives longer and can be attached/detached at any time.
+        -The best example of Observer is that it could be “send registration confirmation emails”.
+
+
+      list down callbacks (21)
+          before/after    validations
+          before/after    save/update/destroy
+          around              save/create/update/destroy
+          after_commit/after_rollback (which are linked to database entries / rollbacks)
+          after_initialize (when new is called on a record)
+          after_find (whenever Active Record loads a record from the database)
+          after_touch (when a record is touched.It can be used along with belongs_to relationship.)
+      
+      destroy (callback and validations checks )vs delete : 
+          
+      before_save vs before_update vs before_create.
+      -before_save is called everytime a record is inserted/updated in the database. So it is called on every save whether its a new record or existing record.
+      -before_update is called only when the record is updated & never on new record.
+
+      after_create vs after_save
+      after_create only works once - just after the record is first created.
+
+      after_save works every time you save the object - even if you're just updating it many years later
+
+      callback runs first or validation? validation runs first.
+        order:
+          before_validation
+          after_validation
+          before_save
+          around_save
+          before_create
+          around_create
+          after_create
+          after_save
+          after_commit/after_rollback
+
+
+      Create vs save vs commit    
+
+        after_create -
+
+        Is called after Model.save on new objects that haven‘t been saved yet (no record exists)
+
+        after_save -
+
+        Is called after Model.save (regardless of whether it‘s a create or update save)
+
+        after_commit -
+
+        Is called after the database transaction is completed.
+
+
+      callback vs filter
+          Filters are methods that are run before, after or “around” a controller action.
+
+          Callbacks allow you to trigger logic before or after an alteration of an object's state in model.
+      
+      Note: rails 4 halted callback chain if false is returned from the before_* callback.but rails 5 does not halted chain in such a case.
+
+      Callback Classes: Sometimes the callback methods that you'll write will be useful enough to be reused by other models.
+
+  VALIDATION - Validations are used to ensure that only valid data is saved into your database
+  
+      class Person < ApplicationRecord
+        validates :name, presence: true
+      end
+      Person.new(name: "John Doe").valid?
+
+      validates_associated: You should use this helper when your model has associations with other models and they also need to be validated.
+  
+      few validators:
+          acceptance: true
+          confirmation: true
+          length: { minimum: 2 } or length: { in: 6..20 }
+          numericality: { only_integer: true }
+          presence: true
+          allow_blank: true
+
+      validate(for Custom Methods) vs validates
+
+      how to check obj is valid?
+      Person.create(name: "John Doe").valid?
+
+      The :on option lets you specify when the validation should happen
+   
+      how to check validation?
+          valid? triggers your validations and returns true if no errors were found in the object, and false otherwise. As you saw above:
+
+          class Person < ApplicationRecord
+            validates :name, presence: true
+          end
+           
+          Person.create(name: "John Doe").valid? # => true
+          Person.create(name: nil).valid? # => false
+
+  what will call first ? validation or callback (refer callback)
+
+  VIEWS - LAYOUTS AND RENDERING
+      Note: We don't have explicit render at the end of the index action in accordance with "convention over configuration" principle. The rule is that if you do not explicitly render something at the end of a controller action, Rails will automatically look for the action_name.html.erb
+
+  asset Pipeline:
+      feature:    
+          -To concatenate assets ,which can reduce the number of requests that a browser makes to render a web page.It is implemented by the sprockets-rails gem, and is enabled by default
+          -To Minification or compression. For CSS files, this is done by removing whitespace and comments
+          Sprockets concatenates all JavaScript files into one master .js file and all CSS files into one master  .css file
+
+      What is Fingerprinting and Why Should I Care?
+          Fingerprinting is a technique that makes the name of a file dependent on the contents of the file. When the file contents change, the filename is also changed.
+
+      How to Use the Asset Pipeline? 
+          Assets can still be placed in the public hierarchy. Any assets under public will be served as static files by the application or web server when config.public_file_server.enabled is set to true. You should use app/assets for files that must undergo some pre-processing before they are served.
+
+          In production, Rails precompiles these files to public/assets by default. The precompiled copies are then served as static assets by the web server. The files in app/assets are never served directly in production.
+
+      Asset Organization:
+          APP/ASSETS is for assets that are owned by the application, such as custom images, JavaScript files,  or stylesheets.
+
+          LIB/ASSETS is for your own libraries' code that doesn't really fit into the scope of the application or those libraries which are shared across applications.
+
+          VENDOR/ASSETS is for assets that are owned by outside entities, such as code for JavaScript plugins and CSS frameworks.
+
+
+  COUNTER CHACHE
+      situation:
+          how many products belongs to our category.
+          we do @category = Category.first
+                      @category.Product.size ,it will perform count query
+                      what if there are 1000 categories? we have to fire 1000 sql queries
+          counter chache allows us to store products_count into column of category table.
+          how product model get to know that increas or decrese the count.
+          we need to tell product by writing :counter_cache => true
+
+  ACTION MAILER BASICS
+      allows you to send emails from your application using mailer classes and views
+  ACTIVE JOB BASICS
+      These jobs can be everything from regularly scheduled clean-ups, to billing charges, to mailings. Anything that can be chopped up into small units of work and run in parallel, really.
+
+      SETUP
+        1.The Active Job adapter must be set to :sidekiq or it will simply use the default :async. This can be done in config/application.rb:
+
+        class Application < Rails::Application
+          # ...
+          config.active_job.queue_adapter = :sidekiq
+        end
+
+
+
+
+  ACTION CABLE OVERVIEW (web socket programming)
+
+  CACHING     
+  * Caching means to store content generated during the request-response cycle and to reuse it when responding to similar requests.
+
+  * Fragment Caching allows a fragment of view logic to be wrapped in a cache block and served out of the cache store when the next request comes in.
+  * to boost an application's performance
+
+
+  DEALING WITH MASSIVE DATA IN RAILS (https://chaione.com/blog/dealing-massive-data-rails/)
+      Avoid ActiveRecord if you can (stick with raw SQL statement)
+      Update all records
+      Only select columns you need
+      Replace the classic Model.all.each with find_in_batches
+      Reduce transactions
+      Don’t forget to index
+      Destroy is expensive(use truncate or destroy_all OR go with the “soft delete” approach)
+      You don’t have to run it immediately(Background job is your friend)
+
+      useful urls: https://www.theodinproject.com/courses/ruby-on-rails/lessons/active-record-queries
+      note :Methods implemented in ActiveRecord::FinderMethods do NOT return ActiveRecord::Relation   objects.eg.find, find_by, first and last. whereas User.where(:id => 1).class is User::ActiveRecord_Relation 
+
+  RAILS COMPONETS (https://stackoverflow.com/questions/6554834/what-exactly-are-the-components-of-rails-activerecord-actioncontroller-etc)
+    Rails components are modules which are included by default in application.rb
+    
+    Actioncable         - (Rails 5.0)
+    Actionmailer        - is  a library to generate and send emails
+    Actionpack          - is a module for handling and responding to web requests
+      Abstract controller
+      Action Controller
+      Action Dispatch
+      Action Pack
+    Actionview
+    Activejob           -is a module for declaring jobs and making them run on a variety of queueing backends
+    Activemodel
+    Activerecord
+    Activestorage       - Active Storage makes it simple to upload and reference files in cloud services like Amazon S3, Google Cloud Storage, or Microsoft Azure Storage, and attach those files to Active Records (Rails 5.2)
+    Activesupport       -([].blank?)  implementation to .blank? method provided in activesupport/lib/active_support/core_ext/object/blank.rb 
+
+
+
+    action mailer 
+    action pack   is a module for handling and responding to web requests (includes action_controller, action_dispatch)
+    action view   is a module for handling view template lookup and rendering
+    active job    
+    active record connects classes to relational database tables (migrations, associations)
+    active support contains all Ruby extensions 
+
+   What is the Logger?
+    Rails makes use of the ActiveSupport::Logger class to write log information. Other loggers, such as Log4r, may also be substituted
+
+
+Other
+  exception handling :
+    https://medium.com/rails-ember-beyond/error-handling-in-rails-the-modular-way-9afcddd2fe1b
+    https://www.honeybadger.io/blog/ruby-exception-vs-standarderror-whats-the-difference/
+  rvm
+  How to send ajax request?
+  rake tasks
+  
+  web development vs mobile API  
+  https://codeburst.io/how-to-build-a-good-api-using-rubyonrails-ef7eadfa3078
+
+  Testing Rails Applications rspec https://www.youtube.com/watch?v=Wb3oIfiLdZU /workspace/study/rails_handson/MusicShop
+  project(shift,fit8,tuts,device-tracking,vopack,wordpress) Overview
+  devise gem(how to override any predefined method)
+Deployment
+  Turbolinks is fast because it doesn’t reload the page when you click on link (spa)
+
+The Lifecycle of a Request: or What happen behind the screen when you hit localhost/clients?
+
+  HTTP Request: Browser requests /users/1 (GET request for user profile).
+  Rack Middleware: Processes cookies, sessions, etc.
+  Routing: Matches GET /users/:id to UsersController#show.
+  Controller Action: UsersController#show calls User.find(1) to get user data.
+  Model: Retrieves user data from the database using Active Record.
+  View Rendering: show.html.erb is rendered with user data.
+  Response: HTML response is generated and sent back to the client.
+
+Questions:
+1.gem "gem-name", "2.0" vs  gem "gem-name", "~>2.0.3" 
+  ans: ~> 2.0.3 means ">= 2.0.3 and < 2.1" in version numbers.
+2.bundle update vs bundle install (https://www.viget.com/articles/bundler-best-practices/)
+  Here are the rules:
+  - Always use bundle install
+  - If you need to upgrade a dependency that Bundler is already managing, use bundle update <gem>.
+  - Don't run bundle update unless you want all of your gems to be upgraded.
+3.https://www.geeksforgeeks.org/reverse-an-array-without-affecting-special-characters/
+  a= [a,b,!,s,$,d]
+  a= [d,s,!,b,$,a] reverse the array without changing spl char position.
+4.mongo aggrigation
+5.shift relationships
+6.polymorpihic association: What is store in interactive_type table. model name or somwthing else? answer model name
+7.perpose of helper methods : asist you to rendering content to your view.
+8.concerns perpose and example
+10.Helperhttps://www.toolsqa.com/software-testing/difference-between-verification-and-validation/ example : insted of 0 I want to display inacitve.
+
+9.rails 3 vs rails 5
+https://rubyinrails.com/2015/09/04/what-is-new-in-rails-5-feature-changes/
+
+11.meta programming - what is eval, present?,alise, normal method vs presentor,bang method
+13.sql join query
+14.rails app directory structure
+16.rails contructor method
+17.Argument passing rule.
+18.self
+19.super keyword
+20.Deployment
+21.varification vs validation. athorization vs athantication.
+    varification - building the product right
+    validation - building the right product
+
+    athorization - do the user can access any perticular resource.
+    authentication  - verifies the identity of users 
+22. use of secret_key_base
+23.rails req/response life cycle - https://www.rubypigeon.com/posts/examining-internals-of-rails-request-response-cycle/
+
+ruby 2.x vs ruby 
+sub vs gsub method (substitution methods)
+web services in rails
+Elastic search
+access method in ruby
+strong paramerter concept- 
+
+condition on include
+  person.include(:address)
+  person address : where address default is true
+  @companies = Company.includes(:persons).where(:persons => { active: true } ).all
+
+
+Focuse on how to write test cases on model?
+Integration of mongo with rails?
+--------------------------
+
+
+
+to permit business_area_ids array
+Parameters: {"utf8"=>"✓", "authenticity_token"=>"/r3gkDdrLL4AyWGdfWz0g3nZUM4f1FEAzU3SV1eU0vKf7Cr0v5ylv7bupdcOM5cNxSDA6BErONhRry6CUTwwEQ==", "job_title"=>{"name"=>"Sales", "description"=>"", "functional_department_id"=>"1", "job_level_id"=>"2", "business_area_ids"=>["", "1", "2", "3", "4"]}, "commit"=>"Save", "id"=>"1"}
+
+
+params.require(:job_title).permit(:name, :description, :functional_department_id, :job_level_id, 
+job_metrics_attributes: [:id, :title, :_destroy], :business_area_ids => []
+)
+
+
+-------------
+
+21.mogoid with rails 5
+
+Rails principel : DRY (same info for add page and edit page of any resource) and convention over confrigration with example.
+
+callbacks
+egar loading
+chaching
+action cable
+scope
+helper methods
+Design pattern
+database
+  indexes
+  joins
+----------
+
+Ruby on Rails architecture best practices.
+Strong OOP knowledge in Ruby.
+Knowledge about refactoring ActiveRecord Models (read this - â€œ7 Patterns to Refactor Fat ActiveRecord Modelsâ€ ).
+SQL concepts like Joins, Relationships etc.
+Designing RESTFul HTTP APIs using JSON-Schema or JSON API (jsonapi.org).
+PostgreSQL and Rails.
+How to use RSpec
+Understanding scaling strategies for a high-traffic Rails applications (2 million+ requests a day).
+Background Job processing using Redis and Sidekiq
+Writing automated Deployment Scripts using Capistrano, Ansible etc.
+Experience in using Amazon Web Services (AWS) tools.
+Knowledge in Linux and Git is mandatory.
+
+Experience in using Active Record Serializer
+Asynchronous Networking in Ruby
+Good Knowledge on Angular or React JS
+Ability to architect and develop API only backend
+Sending emails in Rails
+Understanding O-Auth2 or JWT (Json Web Token) authentication mechanisms.
+Rails Security Best Practices
+Understanding DB Partition strategies.
+
+Optional
+  Node.js
+  JRuby
+
+
+Rails vs other languages like php, java.
+
+rails 4  vs rails 5
+- If you’re implementing a Mobile Application where you don’t need Web UI implementation - Then you can implement Backend part in Rails and expose APIs which would be called from Mobile Application (either Android / iOS or any other platform)
+
+-ActionCable is the new thing in Rails 5, it is a framework for real time communication over web sockets.
+ActionCable is Framework for Real-Time communication
+
+
+-Rails 4 requires Ruby 1.9.3 or higher and prefers Ruby 2.0 
+while Rails 5 only work with Ruby 2.2.1 or better.
+
+-Symbols were not getting garbage collected prior to Ruby 2.2.1. From the release of Ruby 2.2.1, symbols are garbage collected as well.
+
+-With Ruby 2.2.2, Rails 5 should get an improvement in performance, less memory usage, and less time spent in GC. This alone should help alone to bring this performance boost. 
+
+-In Rails 5, you can do everything with rails command
+
+UNKNOWN THINGS:
+1.test_cases,rspec
+2.capistrano,ansible
+3.sidekiq,sinatra
+4.any one gem in detail like devise. and process of creating gem
+5.concerns
+
+test cases
+diff before vs let vs let!
+
+
+https://www.codementor.io/blog/ruby-on-rails-interview-questions-du107w0ss
+
+
+
+-------------persistant-----------------
+REST:  PUT VS PATCH
+
+Rails api application
+  what you need to do if you want to convert rails app to api app 
+  https://hashrocket.com/blog/posts/how-to-make-rails-5-api-only#migrating-to-rails-5-api-app-from-a-traditional-app
+
+Middleware
+https://www.youtube.com/watch?v=yiTfevxB43k
+
+Test cases deployment
+polymorphism in ruby ( not in rails)
+scope
+diff rails 3 rails 4 and rails 5
+
+perpose of ORM
+caching
+----------------------------------------
+data structure
+
+do this rails api
+https://scotch.io/tutorials/build-a-restful-json-api-with-rails-5-part-one
+https://www.youtube.com/watch?v=lgdUqtw4weg
+
+
+https://www.codementor.io/victor_hazbun/export-records-to-csv-files-ruby-on-rails-vda8323q0
+how to create your own gem? https://www.sitepoint.com/creating-your-first-gem/
+https://bundler.io/v2.0/guides/creating_gem.html
+------
+
+
+https://stackoverflow.com/questions/10524651/is-there-any-performance-gain-in-indexing-a-boolean-field
+what will you think if you want to develop API specific application?
+middleware?
+
+
+eger loading
+elastic search
+update huge production dataset wichout intruption? sharding concept
+Transaction management
+Thread management
+include ,prepend, extend : 
+class method or instance method
+knowledge about ruby interpreter?
+Functional vs non functional req.
+how to send attachment in email?
+Rack middleware: what you can do in beetween?
+
+rails cross browser fogary
+
+
+• Experience with Ruby 5+ years including experience with JRuby
+• Good understanding of the syntax of Ruby and writing clean, readable Ruby code.
+• Understanding of metaprogramming in Ruby.
+• Skills for writing reusable Ruby libraries.
+• Experience with web application frameworks Rails.
+• Experience with databases. Ideally experience with MySQL.
+• Experience with Actor model (Celluloid)
+• Experience with rack applications and rake tasks.
+• Experience with writing tests with RSpec.
+• Solid understanding of object-oriented programming.
+• Familiarity with concepts such as (MVC, Mocking, ORM, and RESTful).
+• Understanding of functional programming.
+• Implementation of automated testing platforms and unit tests.
+• Proficient understanding of code versioning tool such as (Mercurial, Git).
+• Familiarity with continuous integration.
+
+
+https://www.rubyguides.com/2016/04/metaprogramming-in-the-wild/
+
+
+what is rails engin?
+https://devblast.com/b/gems-vs-engines-know-the-difference
+
+Making sense of ActiveRecord joins, includes, preload, and eager_load
+https://scoutapm.com/blog/activerecord-includes-vs-joins-vs-preload-vs-eager_load-when-and-where
+
+perpose of Gemfile.lock?
+Gemfile.lock ensures that other developers on your app, as well as your deployment environment, use exactly the same third-party code as you just installed.
+
+https://stackoverflow.com/questions/6927442/what-is-the-difference-between-gemfile-and-gemfile-lock-in-ruby-on-rails
+
+
+form_tag vs form for

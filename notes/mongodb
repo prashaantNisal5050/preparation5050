@@ -1,0 +1,37 @@
+# mongod --dbpath="/Users/PNL3/workspace/RND/mongodb/data/db"
+
+db.inventory.insertOne({
+  item: "laptop",
+  qty: 50,
+  category: "electronics",
+  tags: ["office", "technology"],
+  price: 1200
+});
+
+
+db.inventory.insertMany([
+  {
+    item: "desk chair",
+    qty: 150,
+    category: "furniture",
+    tags: ["office", "seating"],
+    price: 100
+  },
+  {
+    item: "pen",
+    qty: 5000,
+    category: "stationery",
+    tags: ["writing", "office"],
+    price: 1
+  },
+  {
+    item: "notebook",
+    qty: 1200,
+    category: "stationery",
+    tags: ["writing", "school"],
+    price: 5
+  }
+]);
+-----
+
+

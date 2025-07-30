@@ -1,0 +1,53 @@
+Basic Questions
+1. What is the difference between concurrency and parallelism?
+
+link: https://www.visuality.pl/posts/concurrency-and-parallelism-in-ruby-processes-threads-fibers-and-ractors#:~:text=Concurrency%20vs%20parallelism&text=Concurrent%20tasks%20are%20started%2C%20executed,same%20time%20on%20multiple%20cores.
+
+concurrancy: Concurrent tasks are started, executed, and finished at different (sometimes overlapping) periods of time on same CPU-Core 
+parallelism: parallel tasks are literally running at the same time on multiple cores
+
+processes:
+Using processes looks easy, but there are drawbacks. 
+Memory usage is high, as the new process needs its own memory allocation,
+creating and switching process context is more expensive, 
+and communication is more complex.
+
+Threads: (threads in the same process share memory, so they are fast)
+Another option for concurrency in Ruby is multithreading.
+Compared to using multiple processes, threads are lightweight
+
+In MRI (CRuby) implementation, the Global Interpreter Lock (GIL) is used 
+prevents the Ruby programs to run in parallel.
+To support real parallelism in Ruby : use JRuby
+
+threads share a memory, so these can access and modify the state of the same objects. This could lead to race conditions -
+
+Fibers:
+Fibers are similar to Threads. 
+The main difference is that it is up to the programmer when to start, pause and resume fibers, while threads are controlled by the operating system. This makes fibers lightweight and more efficient when it comes to context switching. Also, a thread can have many fibers.
+
+Although Ruby isn't the fastest and the best language to utilize the multithreaded capabilities of CPUs, it is possible to write programs that use it. Many gems implement concurrency and parallelism, but it is good to know how this could be done in pure Ruby, so a custom solution might fit to solve some performance and scalability problems. With the Ruby 3 release, language gains new features, which improve concurrency and even parallelism.
+
+
+
+2. How does Ruby handle multithreading?
+3. What is the Global Interpreter Lock (GIL) in Ruby? How does it affect multithreading?
+4. What are Threads in Ruby, and how do you create one?
+5. How do you handle race conditions in Ruby?
+  1.A Mutex (mutual exclusion) ensures that only one thread modifies the shared resource at a time.
+  2.Use Database Transactions
+  3.Use Redis-Based Locking
+
+6. What is a deadlock? How can you prevent it in a multi-threaded Ruby application?
+7. How does Ruby’s Thread.new work? Can you give an example?
+8. How can you ensure thread safety in Ruby applications?
+9. What are some common pitfalls when using threads in Ruby?
+10.What’s the difference between Thread.join and Thread.abort_on_exception?
+----
+
+
+SMTP isn’t suitable for mass emails due to rate limits. Use services like:
+* Amazon SES
+* SendGrid
+* Mailgun
+* Postmark

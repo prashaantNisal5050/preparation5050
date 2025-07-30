@@ -1,0 +1,82 @@
+common notes
+
+npm init -y # will create package json
+npm i parcel -D # dev dependancies
+npm i react react-dom
+
+from old project copy app.jsx,index.html,script.jsx
+----
+
+# Why do we need React? | The Complete React Course | Ep.01
+
+What is Imperative Programming?
+What is Declarative Programming? declare once and react will update it everywhere
+
+3 Primary Reasons to learn React - 
+
+Summary :
+Three main reason to learn or use an react (updations will be easy), 
+1. Declarative programming : 
+Declarative programming in React refers to the programming paradigm where you describe what you want to achieve rather than how to achieve it. In React, you declare the desired UI structure and the framework ensures that the actual DOM updates reflect that structure.
+
+2. Component-based architecture :(reusable)
+ In React, content-based architecture refers to designing your application structure around the content (or data) and how it flows through the components. This approach emphasizes separating the concerns of content presentation and logic, often utilizing a hierarchical or compositional structure to manage how content is passed and displayed throughout the application.
+
+3. single-page applications : (load once , no page reloading, feel good)
+A Single Page Application (SPA) in React is a web application that dynamically loads and updates content without requiring a full page reload. Instead of navigating between different HTML pages, the entire application runs on a single HTML page, and React manages the views by re-rendering specific components based on user interactions.
+-------
+# How Source Maps Can Save You Time in React Development | The Complete React Course | Ep.05
+
+---
+
+# Why Should You Learn React With Parcel? | The Complete React Course | Ep.07
+
+perpose of bebel: converts javascript code into another form.
+It's a Javascript compiler
+
+# Introduction to React Component | The Complete React Course | Ep.09
+
+> behind the screen: 
+  const root = createRoot(document.getElementById("app"));
+  root.render({
+    $$typeof:Symbol.for('react.element'),
+    type: 'h1',
+    ref:null,
+    props:{
+      children: "hello word"
+    }
+  });
+
+> Destructuring : convenient way to extract values from objects or arrays
+  Example: 
+
+  const Greeting = ({ name, age }) => {
+      return <h1>Hello, {name}! You are {age} years old.</h1>;
+  };
+  // Usage
+  <Greeting name="John" age={30} />
+
+>  what is react compoment
+
+my defination: react compoment 1 react element hai --> jiska type function hota hai ---> woh function react element return kar raha ho.
+
+techical def: function which return some jsx code.
+
+visual perpspective def : reusable piece of UI
+----
+also read about batch update
+what is state : data or information about the component. 
+
+---
+
+useEffect Hook in React | Hindi | The Complete React Course | Ep.21
+
+useState : to create the state
+
+useEffect: to monitor/ track the state
+
+Takes a dependency array to control when the effect runs. It can run after every render, only once on mount, or when specified dependencies change.
+
+----
+Todays aim from
+v23 - v33 sunday
